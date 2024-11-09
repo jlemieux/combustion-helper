@@ -1,262 +1,349 @@
-CombustionHelper = {} 
+CombustionHelper = {}
 
-LibTransition = LibStub("LibTransition-1.0"); 
-CombuLSM = LibStub("LibSharedMedia-3.0") 
+LibTransition = LibStub("LibTransition-1.0")
+CombuLSM = LibStub("LibSharedMedia-3.0")
 
-Combustion_UpdateInterval = 0.1; -- How often the OnUpdate code will run (in seconds)
+Combustion_UpdateInterval = 0.1 -- How often the OnUpdate code will run (in seconds)
 
-local lvb, ffb, ignite, pyro1, pyro2, comb, impact, CritMass, ShadowMast, combulbtimer, combuffbtimer, combupyrotimer, combucrittimer, combupyrocast, combuclientVersion, combucritpredict, combucrittarget
-local LBTime,FFBTime, IgnTime, PyroTime, CombustionUp, ffbglyph, combufadeout, ImpactUp, ffbheight, critheight, combucritwidth, lbraidcheck, lbtablerefresh, combuimpacttimer
-local combulbrefresh, lbraidcheck, lbtablerefresh, lbgroupsuffix, lbtargetsuffix, lbgroupnumber, lbtrackerheight, combupyrogain, combupyrorefresh, combucolorinstance
-local combuignitebank, combuigniteapplied, combuignitevalue, combuignitetemp, combuignitemunched, combuigndamage, combuignitecount
-local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, combucombustiontimestamp, combucombustiondmg, combucombustionprevdmg, combuticks, combuprevticks, combutickdmg, combutickprevdmg, combuprevtargets, combutargets
-local combufirepower, combucriticalmass, combupyrodps, combulbdps, combuhastetick, combucurrenthaste, combucurrentcrit, combuexpecteddmg, combuexpectedtickdmg
+local lvb,
+    ffb,
+    ignite,
+    pyro1,
+    pyro2,
+    comb,
+    impact,
+    CritMass,
+    ShadowMast,
+    combulbtimer,
+    combuffbtimer,
+    combupyrotimer,
+    combucrittimer,
+    combupyrocast,
+    combuclientVersion,
+    combucritpredict,
+    combucrittarget
+local LBTime,
+    FFBTime,
+    IgnTime,
+    PyroTime,
+    CombustionUp,
+    ffbglyph,
+    combufadeout,
+    ImpactUp,
+    ffbheight,
+    critheight,
+    combucritwidth,
+    lbraidcheck,
+    lbtablerefresh,
+    combuimpacttimer
+local combulbrefresh,
+    lbraidcheck,
+    lbtablerefresh,
+    lbgroupsuffix,
+    lbtargetsuffix,
+    lbgroupnumber,
+    lbtrackerheight,
+    combupyrogain,
+    combupyrorefresh,
+    combucolorinstance
+local combuignitebank,
+    combuigniteapplied,
+    combuignitevalue,
+    combuignitetemp,
+    combuignitemunched,
+    combuigndamage,
+    combuignitecount
+local timestamp,
+    event,
+    hideCaster,
+    sourceGUID,
+    sourceName,
+    sourceFlags,
+    sourceRaidFlags,
+    destGUID,
+    destName,
+    destFlags,
+    destRaidFlags,
+    spellId,
+    spellName,
+    spellSchool,
+    amount,
+    overkill,
+    school,
+    resisted,
+    blocked,
+    absorbed,
+    critical,
+    combucombustiontimestamp,
+    combucombustiondmg,
+    combucombustionprevdmg,
+    combuticks,
+    combuprevticks,
+    combutickdmg,
+    combutickprevdmg,
+    combuprevtargets,
+    combutargets
+local combufirepower,
+    combucriticalmass,
+    combupyrodps,
+    combulbdps,
+    combuhastetick,
+    combucurrenthaste,
+    combucurrentcrit,
+    combuexpecteddmg,
+    combuexpectedtickdmg
 local combubasewidth, combunumhasteprocs, combucurrenthasteproc, combucurrenthasteproctimer, combuflathastevalue
-function Combustion_OnLoad(Frame) 
-                                               
-    if select(2, UnitClass("player")) ~= "MAGE" then CombustionFrame:Hide() return end
-        
-  Frame:RegisterForDrag("LeftButton")
-  Frame:RegisterEvent("PLAYER_LOGIN")
-  Frame:RegisterEvent("PLAYER_TALENT_UPDATE")
-  Frame:RegisterEvent("GLYPH_ADDED")
-  Frame:RegisterEvent("GLYPH_REMOVED")
-  Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
-  Frame:RegisterEvent("PLAYER_REGEN_ENABLED")
-   Frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-   CombuLSM.RegisterCallback(CombustionHelper , "LibSharedMedia_Registered", "SharedMedia_Registered") 
+function Combustion_OnLoad(Frame)
+    if select(2, UnitClass("player")) ~= "MAGE" then
+        CombustionFrame:Hide()
+        return
+    end
 
-  CombuLSM:Register("background","Blizzard Tooltip","Interface\\Tooltips\\UI-Tooltip-Background")
-  CombuLSM:Register("border","Blizzard Tooltip","Interface\\Tooltips\\UI-Tooltip-Border")
-  CombuLSM:Register("border","ElvUI Border","Interface\\AddOns\\CombustionHelper\\Images\\ElvUIBorder")
-  CombuLSM:Register("statusbar","CombuBar","Interface\\AddOns\\CombustionHelper\\Images\\combubarblack")
-  CombuLSM:Register("sound","CH Volcano","Interface\\AddOns\\CombustionHelper\\Sound\\Volcano.ogg")
+    Frame:RegisterForDrag("LeftButton")
+    Frame:RegisterEvent("PLAYER_LOGIN")
+    Frame:RegisterEvent("PLAYER_TALENT_UPDATE")
+    Frame:RegisterEvent("GLYPH_ADDED")
+    Frame:RegisterEvent("GLYPH_REMOVED")
+    Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    Frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    Frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    CombuLSM.RegisterCallback(CombustionHelper, "LibSharedMedia_Registered", "SharedMedia_Registered")
 
-    lvb = GetSpellInfo(44457) 
-    ffb = GetSpellInfo(44614) 
-    ignite = GetSpellInfo(12654) 
-    pyro1 = GetSpellInfo(11366) 
-    pyro2 = GetSpellInfo(92315) 
-    comb = GetSpellInfo(11129)   
+    CombuLSM:Register("background", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Background")
+    CombuLSM:Register("border", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Border")
+    CombuLSM:Register("border", "ElvUI Border", "Interface\\AddOns\\CombustionHelper\\Images\\ElvUIBorder")
+    CombuLSM:Register("statusbar", "CombuBar", "Interface\\AddOns\\CombustionHelper\\Images\\combubarblack")
+    CombuLSM:Register("sound", "CH Volcano", "Interface\\AddOns\\CombustionHelper\\Sound\\Volcano.ogg")
+
+    lvb = GetSpellInfo(44457)
+    ffb = GetSpellInfo(44614)
+    ignite = GetSpellInfo(12654)
+    pyro1 = GetSpellInfo(11366)
+    pyro2 = GetSpellInfo(92315)
+    comb = GetSpellInfo(11129)
     impact = GetSpellInfo(64343)
     CritMass = GetSpellInfo(22959)
     ShadowMast = GetSpellInfo(17800)
     combudot = GetSpellInfo(83853)
-    
+
     LibTransition:Attach(Frame)
-    
+
     CombuLanguageCheck()
-  CombuTableCopy()
-  CombustionVarReset()
-      
+    CombuTableCopy()
+    CombustionVarReset()
 end
 
 local LBtrackertable = {}
 
-local combuhasteplateau = {{0,10},
-                            {639,11},
-                            {1922,12},
-                            {3212,13},
-                            {4488,14},
-                            {5767,15},
-                            {7033,16},
-                            {8309,17},
-                            {9602,18},
-                            {10887,19},
-                            {12182,20}}
+local combuhasteplateau = {
+    {0, 10},
+    {639, 11},
+    {1922, 12},
+    {3212, 13},
+    {4488, 14},
+    {5767, 15},
+    {7033, 16},
+    {8309, 17},
+    {9602, 18},
+    {10887, 19},
+    {12182, 20}
+}
 
-local combuLBplateau = {{0,4},
-                        {1602,5},
-                        {4805,6},
-                        {8000,7},
-                        {11198,8},
-                        {14412,9},
-                        {17600,10}}                        
+local combuLBplateau = {
+    {0, 4},
+    {1602, 5},
+    {4805, 6},
+    {8000, 7},
+    {11198, 8},
+    {14412, 9},
+    {17600, 10}
+}
 
-local combuhasteprocs = {[109844] = {78477,"haste","flat",2175,60,10}, -- problem with staff wielder buff and people buff
-                            [107804] = {77190,"haste","flat",1928,60,10},-- problem with staff wielder buff and people buff
-                            [109842] = {78486,"haste","flat",1707,60,10},-- problem with staff wielder buff and people buff
-                            [109789] = {77991,"haste","flat",3278,100,20},
-                            [107982] = {77203,"haste","flat",2904,100,20},
-                            [109787] = {77971,"haste","flat",2573,100,20},
-                            [109804] = {77989,"haste","flat",3278,100,20},
-                            [90887] = {56320,"haste","flat",1710,75,15},
-                            [90885] = {55787,"haste","flat",918,75,15},
-                            [59626] = {3790,"haste","flat",250,35,10},
-                            [74221] = {4083,"haste","flat",450,45,12},
-                            [80353] = {0000,"haste","percent",30,600,40}, --time warp
-                            [2825] = {0000,"haste","percent",30,600,40}, --bloodlust                            
-                            [32182] = {0000,"haste","percent",30,600,40}, --heroism
-                            [44403] = {0000,"haste","percent",3}} --netherwind presence rank 3                            
-                            
+local combuhasteprocs = {
+    [109844] = {78477, "haste", "flat", 2175, 60, 10}, -- problem with staff wielder buff and people buff
+    [107804] = {77190, "haste", "flat", 1928, 60, 10},
+     -- problem with staff wielder buff and people buff
+    [109842] = {78486, "haste", "flat", 1707, 60, 10},
+     -- problem with staff wielder buff and people buff
+    [109789] = {77991, "haste", "flat", 3278, 100, 20},
+    [107982] = {77203, "haste", "flat", 2904, 100, 20},
+    [109787] = {77971, "haste", "flat", 2573, 100, 20},
+    [109804] = {77989, "haste", "flat", 3278, 100, 20},
+    [90887] = {56320, "haste", "flat", 1710, 75, 15},
+    [90885] = {55787, "haste", "flat", 918, 75, 15},
+    [59626] = {3790, "haste", "flat", 250, 35, 10},
+    [74221] = {4083, "haste", "flat", 450, 45, 12},
+    [80353] = {0000, "haste", "percent", 30, 600, 40}, --time warp
+    [2825] = {0000, "haste", "percent", 30, 600, 40}, --bloodlust
+    [32182] = {0000, "haste", "percent", 30, 600, 40}, --heroism
+    [44403] = {0000, "haste", "percent", 3}
+} --netherwind presence rank 3
+
 local combucurrenthasteprocs = {}
-                            
-combudefaultsettingstable = {["combulock"] = false,
-              ["combuffb"] = true,
-              ["combuautohide"] = 1,
-              ["combuimpact"] = true,
-              ["combuscale"] = 1,
-              ["combubeforefade"] = 15,
-              ["combuafterfade"] = 15,
-              ["combufadeoutspeed"] = 2,
-              ["combufadeinspeed"] = 2,
-              ["combuwaitfade"] = 86,
-              ["combufadealpha"] = 0,
-              ["combubartimers"] = false,
-              ["combucrit"] = true,
-              ["comburefreshmode"] = true,
-              ["combureport"] = true,
-              ["combureportvalue"] = 0,
-              ["combureportthreshold"] = false,
-              ["combureportpyro"] = true,
-              ["combutrack"] = true,
-              ["combuchat"] = true,
-              ["combulbtracker"] = true,
-              ["combubarwidth"] = 24,
-              ["combulbup"] = true,
-              ["combulbdown"] = false,
-              ["combulbright"] = false,
-              ["combulbleft"] = false,
-              ["combulbtarget"] = true,
-              ["combutimervalue"] = 2,
-              ["combuignitereport"] = true,
-              ["combuignitedelta"] = 0,
-              ["combuignitepredict"] = true,
-              ["combureportmunching"] = true,
-              ["combuflamestrike"] = true,
-              ["combutexturename"] = "CombuBar",
-              ["combufontname"] = "Friz Quadrata TT",
-              ["combusoundname"] = "CombustionHelper Volcano",
-              ["barcolornormal"] = {0,0.5,0.8,1},
-              ["barcolorwarning"] = {1,0,0,1},
-              ["textcolornormal"] = {1,1,1,1},
-              ["textcolorwarning"] = {1,0,0,1},
-              ["textcolorvalid"] = {0,1,0,1},
-              ["buttontexturewarning"] = "Interface\\AddOns\\CombustionHelper\\Images\\Combustionoff",
-              ["buttontexturevalid"] = "Interface\\AddOns\\CombustionHelper\\Images\\Combustionon",
-              ["bgcolornormal"] = {0.25,0.25,0.25,1},
-              ["bgcolorimpact"] = {1,0.82,0,0.5},
-              ["bgcolorcombustion"] = {0,0.7,0,0.5},
-              ["edgecolornormal"] = {0.67,0.67,0.67,1},
-              ["bgFile"] = "Blizzard Tooltip",
-                          ["tileSize"] = 16,
-                          ["edgeFile"] = "Blizzard Tooltip",
-                          ["tile"] = true,
-                          ["edgeSize"] = 16,
-                          ["insets"] = 5,
-                            ["language"] = "Default",
-                            ["thresholdalert"] = true,
-                            ["combuticktexturename"] = "CombuBar",
-                            ["combutickpredict"] = true,
+
+combudefaultsettingstable = {
+    ["combulock"] = false,
+    ["combuffb"] = true,
+    ["combuautohide"] = 1,
+    ["combuimpact"] = true,
+    ["combuscale"] = 1,
+    ["combubeforefade"] = 15,
+    ["combuafterfade"] = 15,
+    ["combufadeoutspeed"] = 2,
+    ["combufadeinspeed"] = 2,
+    ["combuwaitfade"] = 86,
+    ["combufadealpha"] = 0,
+    ["combubartimers"] = false,
+    ["combucrit"] = true,
+    ["comburefreshmode"] = true,
+    ["combureport"] = true,
+    ["combureportvalue"] = 0,
+    ["combureportthreshold"] = false,
+    ["combureportpyro"] = true,
+    ["combutrack"] = true,
+    ["combuchat"] = true,
+    ["combulbtracker"] = true,
+    ["combubarwidth"] = 24,
+    ["combulbup"] = true,
+    ["combulbdown"] = false,
+    ["combulbright"] = false,
+    ["combulbleft"] = false,
+    ["combulbtarget"] = true,
+    ["combutimervalue"] = 2,
+    ["combuignitereport"] = true,
+    ["combuignitedelta"] = 0,
+    ["combuignitepredict"] = true,
+    ["combureportmunching"] = true,
+    ["combuflamestrike"] = true,
+    ["combutexturename"] = "CombuBar",
+    ["combufontname"] = "Friz Quadrata TT",
+    ["combusoundname"] = "CombustionHelper Volcano",
+    ["barcolornormal"] = {0, 0.5, 0.8, 1},
+    ["barcolorwarning"] = {1, 0, 0, 1},
+    ["textcolornormal"] = {1, 1, 1, 1},
+    ["textcolorwarning"] = {1, 0, 0, 1},
+    ["textcolorvalid"] = {0, 1, 0, 1},
+    ["buttontexturewarning"] = "Interface\\AddOns\\CombustionHelper\\Images\\Combustionoff",
+    ["buttontexturevalid"] = "Interface\\AddOns\\CombustionHelper\\Images\\Combustionon",
+    ["bgcolornormal"] = {0.25, 0.25, 0.25, 1},
+    ["bgcolorimpact"] = {1, 0.82, 0, 0.5},
+    ["bgcolorcombustion"] = {0, 0.7, 0, 0.5},
+    ["edgecolornormal"] = {0.67, 0.67, 0.67, 1},
+    ["bgFile"] = "Blizzard Tooltip",
+    ["tileSize"] = 16,
+    ["edgeFile"] = "Blizzard Tooltip",
+    ["tile"] = true,
+    ["edgeSize"] = 16,
+    ["insets"] = 5,
+    ["language"] = "Default",
+    ["thresholdalert"] = true,
+    ["combuticktexturename"] = "CombuBar",
+    ["combutickpredict"] = true
 }
 function CombuLanguageCheck()
-
-    if combusettingstable then 
-    
-        if combusettingstable["language"] == "Francais" or combusettingstable["language"] == "Default" and GetLocale() == "frFR" then
-
+    if combusettingstable then
+        if
+            combusettingstable["language"] == "Francais" or
+                combusettingstable["language"] == "Default" and GetLocale() == "frFR"
+         then
             CombuLoc = CombuLocFR
             combuoptioninfotable = combuoptioninfotableFR
             CombuOptLoc = CombuOptLocFR
             CombuLBposition = CombuLBpositionFR
             CombuAutohideList = CombuAutohideListFR
             CombuLabel = CombuLabelFR
-                
-        elseif combusettingstable["language"] == "Deutsch" or combusettingstable["language"] == "Default" and GetLocale() == "deDE" then
-            
+        elseif
+            combusettingstable["language"] == "Deutsch" or
+                combusettingstable["language"] == "Default" and GetLocale() == "deDE"
+         then
             CombuLoc = CombuLocDE
             combuoptioninfotable = combuoptioninfotableDE
             CombuOptLoc = CombuOptLocDE
             CombuLBposition = CombuLBpositionDE
             CombuAutohideList = CombuAutohideListDE
             CombuLabel = CombuLabelDE
-            
-        elseif combusettingstable["language"] == "Chinese" or combusettingstable["language"] == "Default" and GetLocale() == "zhTW" then
-            
+        elseif
+            combusettingstable["language"] == "Chinese" or
+                combusettingstable["language"] == "Default" and GetLocale() == "zhTW"
+         then
             CombuLoc = CombuLocTW
             combuoptioninfotable = combuoptioninfotableTW
             CombuOptLoc = CombuOptLocTW
             CombuLBposition = CombuLBpositionTW
             CombuAutohideList = CombuAutohideListTW
             CombuLabel = CombuLabelTW
-
-        else CombuLoc = CombuLocEN
+        else
+            CombuLoc = CombuLocEN
             combuoptioninfotable = combuoptioninfotableEN
             CombuOptLoc = CombuOptLocEN
             CombuLBposition = CombuLBpositionEN
             CombuAutohideList = CombuAutohideListEN
             CombuLabel = CombuLabelEN
-
         end
-    else CombuLoc = CombuLocEN
+    else
+        CombuLoc = CombuLocEN
         combuoptioninfotable = combuoptioninfotableEN
         CombuOptLoc = CombuOptLocEN
         CombuLBposition = CombuLBpositionEN
         CombuAutohideList = CombuAutohideListEN
         CombuLabel = CombuLabelEN
-        
-   end
-
+    end
 end
 
 function CombuTableCopy()
+    combusettingstable = {}
 
-  combusettingstable = {}
-  
-  for k,v in pairs(combudefaultsettingstable) do 
-    if type(v) == "table" then
-      combusettingstable[k] = {}
-      for i = 1,#v do
-        table.insert(combusettingstable[k],v[i])
-      end
-    else combusettingstable[k] = v 
+    for k, v in pairs(combudefaultsettingstable) do
+        if type(v) == "table" then
+            combusettingstable[k] = {}
+            for i = 1, #v do
+                table.insert(combusettingstable[k], v[i])
+            end
+        else
+            combusettingstable[k] = v
+        end
     end
-  end
-    
 end
 
 function CombuTableNewSettingsCheck()
-      
-   for k,v in pairs(combudefaultsettingstable) do 
-         
-         if combusettingstable[k] == nil then print(k) combuprut = 1
-        
+    for k, v in pairs(combudefaultsettingstable) do
+        if combusettingstable[k] == nil then
+            print(k)
+            combuprut = 1
+
             if type(v) == "table" then
-
                 combusettingstable[k] = {}
-                for i = 1,#v do
-                    table.insert(combusettingstable[k],v[i])
+                for i = 1, #v do
+                    table.insert(combusettingstable[k], v[i])
                 end
-            else combusettingstable[k] = v   
-
+            else
+                combusettingstable[k] = v
             end
         end
-  end
+    end
 end
 
 ----------------------------------
 -- Helper function to reset some variables
 function CombustionVarReset()
+    combupyrogain = 0 -- variables related to post fight report
+    combupyrorefresh = 0
+    combupyrocast = 0
+    combulbrefresh = 0
 
-  combupyrogain = 0 -- variables related to post fight report
-     combupyrorefresh = 0
-     combupyrocast = 0
-     combulbrefresh = 0
-     
-     combuignitebank = 0 -- variables related to ignite
+    combuignitebank = 0 -- variables related to ignite
     combuigniteapplied = 0
     combuignitevalue = 0
     combuignitetemp = 0
     combuignitemunched = 0
     combuigndamage = 0
     combuignitecount = 0
-    
 end
 
 --------------------------------
 -- Helper function for Sharemedia support
 function CombustionHelper:SharedMedia_Registered()
---	print("prut")
+    --	print("prut")
     -- do whatever needs to be done to repaint / refont
 end
 
@@ -264,972 +351,1201 @@ end
 -- helper function for option panel setup
 function CombustionHelperOptions_OnLoad(panel)
     CombuLanguageCheck()
-  panel.name = "CombustionHelper"
-  InterfaceOptions_AddCategory(panel);
+    panel.name = "CombustionHelper"
+    InterfaceOptions_AddCategory(panel)
 end
 
 -------------------------------
 -- helper function for customisation option panel setup
 function CombustionHelperCustomOptions_OnLoad(panel)
     CombuLanguageCheck()
-  panel.name = CombuLoc["interfaceGraph"]
-  panel.parent = "CombustionHelper"
-  InterfaceOptions_AddCategory(panel);
+    panel.name = CombuLoc["interfaceGraph"]
+    panel.parent = "CombustionHelper"
+    InterfaceOptions_AddCategory(panel)
 end
 
 -------------------------------
 -- helper function for tick option panel setup
 function CombustionHelperTickOptions_OnLoad(panel)
     CombuLanguageCheck()
-  panel.name = "tick bar" --CombuLoc["interfaceGraph"]
-  panel.parent = "CombustionHelper"
-  InterfaceOptions_AddCategory(panel);
+    panel.name = "tick bar" --CombuLoc["interfaceGraph"]
+    panel.parent = "CombustionHelper"
+    InterfaceOptions_AddCategory(panel)
 end
 
 -------------------------------
 -- lock function for option panel
 function Combustionlock()
-
-  if CombulockButton:GetChecked(true) then combusettingstable["combulock"] = true 
-                                 CombustionFrame:EnableMouse(false)
-                                 CombulockButton:SetChecked(true)
-                                 if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lockon"]) end
-  else combusettingstable["combulock"] = false 
-         CombustionFrame:EnableMouse(true)
-         CombulockButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lockoff"]) end
-  end
+    if CombulockButton:GetChecked(true) then
+        combusettingstable["combulock"] = true
+        CombustionFrame:EnableMouse(false)
+        CombulockButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lockon"])
+        end
+    else
+        combusettingstable["combulock"] = false
+        CombustionFrame:EnableMouse(true)
+        CombulockButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lockoff"])
+        end
+    end
 end
 
 -------------------------------
 -- chat function for option panel
 function Combustionchat()
-
-  if CombuchatButton:GetChecked(true) then combusettingstable["combuchat"] = true 
-                                 CombuchatButton:SetChecked(true)
-                                 ChatFrame1:AddMessage(CombuLoc["reporton"])
-  else combusettingstable["combuchat"] = false 
-         CombuchatButton:SetChecked(false)
-  end
+    if CombuchatButton:GetChecked(true) then
+        combusettingstable["combuchat"] = true
+        CombuchatButton:SetChecked(true)
+        ChatFrame1:AddMessage(CombuLoc["reporton"])
+    else
+        combusettingstable["combuchat"] = false
+        CombuchatButton:SetChecked(false)
+    end
 end
 
 -------------------------------
 -- threshold sound function for option panel
 function CombustionThresholdSound()
-
-  if CombuThresholdSoundButton:GetChecked(true) then combusettingstable["thresholdalert"] = true 
-                                 CombuThresholdSoundButton:SetChecked(true)
-  else combusettingstable["thresholdalert"] = false 
-         CombuThresholdSoundButton:SetChecked(false)
-  end
+    if CombuThresholdSoundButton:GetChecked(true) then
+        combusettingstable["thresholdalert"] = true
+        CombuThresholdSoundButton:SetChecked(true)
+    else
+        combusettingstable["thresholdalert"] = false
+        CombuThresholdSoundButton:SetChecked(false)
+    end
 end
 
 -------------------------------
 -- threshold function for option panel
 function Combustionthreshold()
-
-  if Combureportthreshold:GetChecked(true) then combusettingstable["combureportthreshold"] = true 
-                                 Combureportthreshold:SetChecked(true)
-  else combusettingstable["combureportthreshold"] = false 
-         Combureportthreshold:SetChecked(false)
-  end
+    if Combureportthreshold:GetChecked(true) then
+        combusettingstable["combureportthreshold"] = true
+        Combureportthreshold:SetChecked(true)
+    else
+        combusettingstable["combureportthreshold"] = false
+        Combureportthreshold:SetChecked(false)
+    end
 end
 
 -------------------------------
 -- threshold function for option panel
 function CombustionTickPredict()
-
-  if CombuTickPredictButton:GetChecked(true) then combusettingstable["combutickpredict"] = true 
-                                 CombuTickPredictButton:SetChecked(true)
-  else combusettingstable["combutickpredict"] = false 
-         CombuTickPredictButton:SetChecked(false)
-  end
+    if CombuTickPredictButton:GetChecked(true) then
+        combusettingstable["combutickpredict"] = true
+        CombuTickPredictButton:SetChecked(true)
+    else
+        combusettingstable["combutickpredict"] = false
+        CombuTickPredictButton:SetChecked(false)
+    end
 end
 
 -------------------------------
 -- ffb function for option panel
 function Combustionffb()
-
-  if CombuffbButton:GetChecked(true) then combusettingstable["combuffb"] = true 
-                                 CombuffbButton:SetChecked(true)
-                                 if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbon"]) end
-  else combusettingstable["combuffb"] = false 
-         CombuffbButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffboff"]) end
-  end
+    if CombuffbButton:GetChecked(true) then
+        combusettingstable["combuffb"] = true
+        CombuffbButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbon"])
+        end
+    else
+        combusettingstable["combuffb"] = false
+        CombuffbButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffboff"])
+        end
+    end
     CombustionFrameresize()
 end
 
 -------------------------------
 -- DPS Report function for option panel
 function Combustionreport()
-
-  if CombureportButton:GetChecked(true) then combusettingstable["combureport"] = true 
-                                             CombureportButton:SetChecked(true)
-                                             if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["dmgreporton"]) end
-  else combusettingstable["combureport"] = false 
-         CombureportButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["dmgreportoff"]) end
-  end
+    if CombureportButton:GetChecked(true) then
+        combusettingstable["combureport"] = true
+        CombureportButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["dmgreporton"])
+        end
+    else
+        combusettingstable["combureport"] = false
+        CombureportButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["dmgreportoff"])
+        end
+    end
 end
 
 -------------------------------
 -- combustion dot tracker function for option panel
 function Combustiontracker()
-
-  if CombutrackerButton:GetChecked(true) then combusettingstable["combutrack"] = true 
-                                             CombutrackerButton:SetChecked(true)
-                                             if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["doton"]) end
-  else combusettingstable["combutrack"] = false 
-         CombutrackerButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["dotoff"]) end
-  end
+    if CombutrackerButton:GetChecked(true) then
+        combusettingstable["combutrack"] = true
+        CombutrackerButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["doton"])
+        end
+    else
+        combusettingstable["combutrack"] = false
+        CombutrackerButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["dotoff"])
+        end
+    end
 end
 
 -------------------------------
 -- lb refresh function for option panel
 function Combustionrefresh()
-
-  if ComburefreshButton:GetChecked(true) then combusettingstable["comburefreshmode"] = true 
-                                                ComburefreshButton:SetChecked(true)
-                                                if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lbon"]) end
-  else combusettingstable["comburefreshmode"] = false 
-         ComburefreshButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lboff"]) end
-  end
+    if ComburefreshButton:GetChecked(true) then
+        combusettingstable["comburefreshmode"] = true
+        ComburefreshButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lbon"])
+        end
+    else
+        combusettingstable["comburefreshmode"] = false
+        ComburefreshButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lboff"])
+        end
+    end
 end
 
 -------------------------------
 -- pyro refresh function for option panel
 function CombustionrefreshPyro()
-
-  if ComburefreshpyroButton:GetChecked(true) then combusettingstable["combureportpyro"] = true 
-                                                ComburefreshpyroButton:SetChecked(true)
-                                                if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["pyroon"]) end
-  else combusettingstable["combureportpyro"] = false 
-         ComburefreshpyroButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["pyrooff"]) end
-  end
+    if ComburefreshpyroButton:GetChecked(true) then
+        combusettingstable["combureportpyro"] = true
+        ComburefreshpyroButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["pyroon"])
+        end
+    else
+        combusettingstable["combureportpyro"] = false
+        ComburefreshpyroButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["pyrooff"])
+        end
+    end
 end
 
 -------------------------------
 -- impact function for option panel
 function Combustionimpact()
-
-  if CombuimpactButton:GetChecked(true) then combusettingstable["combuimpact"] = true 
-                                               CombuimpactButton:SetChecked(true)
-                                               if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["impacton"]) end
-  else combusettingstable["combuimpact"] = false 
-         CombuimpactButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["impactoff"]) end
-  end
+    if CombuimpactButton:GetChecked(true) then
+        combusettingstable["combuimpact"] = true
+        CombuimpactButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["impacton"])
+        end
+    else
+        combusettingstable["combuimpact"] = false
+        CombuimpactButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["impactoff"])
+        end
+    end
 end
 
 -------------------------------
 -- Scale function for option panel
-function CombustionScale (scale)
-
-  CombustionFrame:SetScale(scale)
-  combusettingstable["combuscale"] = scale
+function CombustionScale(scale)
+    CombustionFrame:SetScale(scale)
+    combusettingstable["combuscale"] = scale
 end
 
 -------------------------------
 -- Bar timer function for option panel
 function Combustionbar()
-
-  if CombuBarButton:GetChecked(true) then combusettingstable["combubartimers"] = true 
-                                            CombuBarButton:SetChecked(true)
-                                            if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["baron"]) end
-  else combusettingstable["combubartimers"] = false 
-         CombuBarButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["baroff"]) end
-  end
+    if CombuBarButton:GetChecked(true) then
+        combusettingstable["combubartimers"] = true
+        CombuBarButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["baron"])
+        end
+    else
+        combusettingstable["combubartimers"] = false
+        CombuBarButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["baroff"])
+        end
+    end
     CombustionFrameresize()
 end
 
 -------------------------------
 -- Critical Mass function for option panel
 function Combustioncrit()
-
-  if CombucritButton:GetChecked(true) then combusettingstable["combucrit"] = true 
-                                             CombucritButton:SetChecked(true)
-                                             if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["criton"]) end
-  else combusettingstable["combucrit"] = false 
-         CombucritButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["critoff"]) end
-  end
+    if CombucritButton:GetChecked(true) then
+        combusettingstable["combucrit"] = true
+        CombucritButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["criton"])
+        end
+    else
+        combusettingstable["combucrit"] = false
+        CombucritButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["critoff"])
+        end
+    end
     CombustionFrameresize()
 end
 
 -------------------------------
 -- Ignite beta predicter function for option panel
 function CombustionIgnitePredict()
-
-  if CombuIgnitePredictButton:GetChecked(true) then combusettingstable["combuignitepredict"] = true 
-                                             CombuIgnitePredictButton:SetChecked(true)
-                                             if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ignpredon"]) end
-  else combusettingstable["combuignitepredict"] = false 
-         CombuIgnitePredictButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ignpredoff"]) end
-  end
+    if CombuIgnitePredictButton:GetChecked(true) then
+        combusettingstable["combuignitepredict"] = true
+        CombuIgnitePredictButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ignpredon"])
+        end
+    else
+        combusettingstable["combuignitepredict"] = false
+        CombuIgnitePredictButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ignpredoff"])
+        end
+    end
 end
 
 -------------------------------
 -- living bomb tracker target mode function for option panel
 function CombustionFlamestrike()
-
-  if CombuFlamestrikeButton:GetChecked(true) then combusettingstable["combuflamestrike"] = true 
-                                                   CombuFlamestrikeButton:SetChecked(true)
-                                                 if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["fson"]) end
-  else combusettingstable["combuflamestrike"] = false 
-         CombuFlamestrikeButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["fsoff"]) end
-  end
+    if CombuFlamestrikeButton:GetChecked(true) then
+        combusettingstable["combuflamestrike"] = true
+        CombuFlamestrikeButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["fson"])
+        end
+    else
+        combusettingstable["combuflamestrike"] = false
+        CombuFlamestrikeButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["fsoff"])
+        end
+    end
 end
 
 -------------------------------
 -- living bomb tracker target mode function for option panel
 function CombustionMunching()
-
-  if CombuMunchingButton:GetChecked(true) then combusettingstable["combureportmunching"] = true 
-                                                 CombuMunchingButton:SetChecked(true)
-                                                if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["munchon"]) end
-  else combusettingstable["combureportmunching"] = false 
-         CombuMunchingButton:SetChecked(false)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["munchoff"]) end
-  end
+    if CombuMunchingButton:GetChecked(true) then
+        combusettingstable["combureportmunching"] = true
+        CombuMunchingButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["munchon"])
+        end
+    else
+        combusettingstable["combureportmunching"] = false
+        CombuMunchingButton:SetChecked(false)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["munchoff"])
+        end
+    end
 end
 
 -------------------------------
 -- living bomb tracker target mode function for option panel
 function CombustionLBtargettracker()
-
-  if CombuLBtargetButton:GetChecked(true) then combusettingstable["combulbtarget"] = true 
-                                                 CombuLBtargetButton:SetChecked(true)
-  else combusettingstable["combulbtarget"] = false 
-         CombuLBtargetButton:SetChecked(false)
-  end
+    if CombuLBtargetButton:GetChecked(true) then
+        combusettingstable["combulbtarget"] = true
+        CombuLBtargetButton:SetChecked(true)
+    else
+        combusettingstable["combulbtarget"] = false
+        CombuLBtargetButton:SetChecked(false)
+    end
 end
 
 -------------------------------
 -- Multiple Living Bomb tracker function for option panel
 function CombustionLBtracker()
-
-  if CombuLBtrackerButton:GetChecked(true) then combusettingstable["combulbtracker"] = true 
-                                             CombuLBtrackerButton:SetChecked(true)
-                                             if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lbtrackon"]) end
-  else combusettingstable["combulbtracker"] = false 
-         CombuLBtrackerButton:SetChecked(false)
-         table.wipe(LBtrackertable)
-         if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["lbtrackoff"]) end
-  end
+    if CombuLBtrackerButton:GetChecked(true) then
+        combusettingstable["combulbtracker"] = true
+        CombuLBtrackerButton:SetChecked(true)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lbtrackon"])
+        end
+    else
+        combusettingstable["combulbtracker"] = false
+        CombuLBtrackerButton:SetChecked(false)
+        table.wipe(LBtrackertable)
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["lbtrackoff"])
+        end
+    end
     CombustionFrameresize()
 end
 
 local combuwidgetlist = {
-  
-  bars = {"LBtrack1Bar","LBtrack2Bar","LBtrack3Bar","LBtrack4Bar","LBtrack5Bar","FFBbar","Pyrobar","Ignbar","LBbar","Combubar","Critbar"},
-  text = {"LBtrack1","LBtrack1Timer","LBtrack2","LBtrack2Timer","LBtrack3","LBtrack3Timer","LBtrack4","LBtrack4Timer","LBtrack5","LBtrack5Timer",
-      "LBLabel","IgniteLabel","PyroLabel","FFBLabel","LBTextFrameLabel","IgnTextFrameLabel","PyroTextFrameLabel","FFBTextFrameLabel",
-      "StatusTextFrameLabel","CritTypeFrameLabel","CritTextFrameLabel"},
+    bars = {
+        "LBtrack1Bar",
+        "LBtrack2Bar",
+        "LBtrack3Bar",
+        "LBtrack4Bar",
+        "LBtrack5Bar",
+        "FFBbar",
+        "Pyrobar",
+        "Ignbar",
+        "LBbar",
+        "Combubar",
+        "Critbar"
+    },
+    text = {
+        "LBtrack1",
+        "LBtrack1Timer",
+        "LBtrack2",
+        "LBtrack2Timer",
+        "LBtrack3",
+        "LBtrack3Timer",
+        "LBtrack4",
+        "LBtrack4Timer",
+        "LBtrack5",
+        "LBtrack5Timer",
+        "LBLabel",
+        "IgniteLabel",
+        "PyroLabel",
+        "FFBLabel",
+        "LBTextFrameLabel",
+        "IgnTextFrameLabel",
+        "PyroTextFrameLabel",
+        "FFBTextFrameLabel",
+        "StatusTextFrameLabel",
+        "CritTypeFrameLabel",
+        "CritTextFrameLabel"
+    }
 }
 
-function CombuBackdropBuild ()
-
-  if not CombuBackdrop then
-  
-    CombuBackdrop = {bgFile="Interface\\Tooltips\\UI-Tooltip-Background",
-                        tileSize=16,
-                        edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",
-                        tile=true,
-                        edgeSize=16,
-                        insets={
-                          top=5,
-                          right=5,
-                          left=5,
-                          bottom=5}}
+function CombuBackdropBuild()
+    if not CombuBackdrop then
+        CombuBackdrop = {
+            bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+            tileSize = 16,
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true,
+            edgeSize = 16,
+            insets = {
+                top = 5,
+                right = 5,
+                left = 5,
+                bottom = 5
+            }
+        }
     end
 
     if combusettingstable then
-        CombuBackdrop["bgFile"] = CombuLSM:Fetch("background",combusettingstable["bgFile"])
+        CombuBackdrop["bgFile"] = CombuLSM:Fetch("background", combusettingstable["bgFile"])
         CombuBackdrop["tileSize"] = combusettingstable["tileSize"]
-        CombuBackdrop["edgeFile"] = CombuLSM:Fetch("border",combusettingstable["edgeFile"])
+        CombuBackdrop["edgeFile"] = CombuLSM:Fetch("border", combusettingstable["edgeFile"])
         CombuBackdrop["tile"] = combusettingstable["tile"]
-        CombuBackdrop["edgeSize"] = combusettingstable["edgeSize"];
-        (CombuBackdrop["insets"])["top"] = combusettingstable["insets"];
-        (CombuBackdrop["insets"])["right"] = combusettingstable["insets"];
-        (CombuBackdrop["insets"])["left"] = combusettingstable["insets"];
+        CombuBackdrop["edgeSize"] = combusettingstable["edgeSize"]
+        (CombuBackdrop["insets"])["top"] = combusettingstable["insets"]
+        (CombuBackdrop["insets"])["right"] = combusettingstable["insets"]
+        (CombuBackdrop["insets"])["left"] = combusettingstable["insets"]
         (CombuBackdrop["insets"])["bottom"] = combusettingstable["insets"]
     end
-    
+
     CombustionFrame:SetBackdrop(CombuBackdrop)
     CombustionFrame:SetBackdropColor(unpack(combusettingstable["bgcolornormal"]))
     CombustionFrame:SetBackdropBorderColor(unpack(combusettingstable["edgecolornormal"]))
     LBtrackFrame:SetBackdrop(CombuBackdrop)
     LBtrackFrame:SetBackdropColor(unpack(combusettingstable["bgcolornormal"]))
     LBtrackFrame:SetBackdropBorderColor(unpack(combusettingstable["edgecolornormal"]))
-
 end
-      
+
 -------------------------------
 -- Helper function for frame resizing
 function CombustionFrameresize()
-  
-    if (combusettingstable["combuffb"] == true) and (ffbglyph == true) then 
-      FFBButton:Show()
+    if (combusettingstable["combuffb"] == true) and (ffbglyph == true) then
+        FFBButton:Show()
         FFBTextFrameLabel:Show()
         FFBLabel:Show()
-        StatusTextFrameLabel:SetPoint("TOPLEFT",FFBLabel,"BOTTOMLEFT",0,0)
+        StatusTextFrameLabel:SetPoint("TOPLEFT", FFBLabel, "BOTTOMLEFT", 0, 0)
         ffbheight = 9
-    else FFBButton:Hide()
-         FFBTextFrameLabel:Hide()
-         FFBLabel:Hide()
-         StatusTextFrameLabel:SetPoint("TOPLEFT",PyroLabel,"BOTTOMLEFT",0,0)
-         ffbheight = 0	
+    else
+        FFBButton:Hide()
+        FFBTextFrameLabel:Hide()
+        FFBLabel:Hide()
+        StatusTextFrameLabel:SetPoint("TOPLEFT", PyroLabel, "BOTTOMLEFT", 0, 0)
+        ffbheight = 0
     end
 
-    if (combusettingstable["combucrit"] == true) then 
-      CritTypeFrameLabel:Show()
-        CritTypeFrameLabel:SetPoint("TOPLEFT",StatusTextFrameLabel,"BOTTOMLEFT",0,0)
+    if (combusettingstable["combucrit"] == true) then
+        CritTypeFrameLabel:Show()
+        CritTypeFrameLabel:SetPoint("TOPLEFT", StatusTextFrameLabel, "BOTTOMLEFT", 0, 0)
         CritTextFrameLabel:Show()
-        CritTextFrameLabel:SetPoint("TOPLEFT",StatusTextFrameLabel,"BOTTOMLEFT",0,0)
+        CritTextFrameLabel:SetPoint("TOPLEFT", StatusTextFrameLabel, "BOTTOMLEFT", 0, 0)
         critheight = 9
-    else CritTypeFrameLabel:Hide()
-         CritTypeFrameLabel:SetPoint("TOPLEFT",StatusTextFrameLabel,"BOTTOMLEFT",0,0)
-         CritTextFrameLabel:Hide()
-         CritTextFrameLabel:SetPoint("TOPLEFT",StatusTextFrameLabel,"BOTTOMLEFT",0,0)
-         Critbar:Hide()
-         critheight = 0
-    end    
-    
-    CombustionFrame:SetHeight(48+ffbheight+critheight)
+    else
+        CritTypeFrameLabel:Hide()
+        CritTypeFrameLabel:SetPoint("TOPLEFT", StatusTextFrameLabel, "BOTTOMLEFT", 0, 0)
+        CritTextFrameLabel:Hide()
+        CritTextFrameLabel:SetPoint("TOPLEFT", StatusTextFrameLabel, "BOTTOMLEFT", 0, 0)
+        Critbar:Hide()
+        critheight = 0
+    end
 
-  if (combusettingstable["combubartimers"] == true) 
-  then CombustionFrame:SetWidth(98+combusettingstable["combubarwidth"]+6)
-     CombustionTextFrame:SetWidth(98+combusettingstable["combubarwidth"]+6)
-     FFBTextFrameLabel:SetWidth(28+combusettingstable["combubarwidth"]+2)
-     FFBTextFrameLabel:SetJustifyH("RIGHT")
-     LBTextFrameLabel:SetWidth(28+combusettingstable["combubarwidth"]+2)
-     LBTextFrameLabel:SetJustifyH("RIGHT")
-     PyroTextFrameLabel:SetWidth(28+combusettingstable["combubarwidth"]+2)
-     PyroTextFrameLabel:SetJustifyH("RIGHT")
-     IgnTextFrameLabel:SetWidth(28+combusettingstable["combubarwidth"]+2)
-     IgnTextFrameLabel:SetJustifyH("RIGHT")
-     CritTextFrameLabel:SetWidth(91+combusettingstable["combubarwidth"]+2)
-         combucritwidth = combusettingstable["combubarwidth"]
-  else combucritwidth = (-7)
-         CombustionFrame:SetWidth(98)
-         CombustionTextFrame:SetWidth(98)
-     FFBTextFrameLabel:SetWidth(28)
-     FFBbar:Hide()
-     FFBTextFrameLabel:SetJustifyH("LEFT")
-     LBTextFrameLabel:SetWidth(28)
-     LBbar:Hide()
-     LBTextFrameLabel:SetJustifyH("LEFT")
-     PyroTextFrameLabel:SetWidth(28)
-     Pyrobar:Hide()
-     PyroTextFrameLabel:SetJustifyH("LEFT")
-     Ignbar:Hide()
-     IgnTextFrameLabel:SetWidth(28)
-     IgnTextFrameLabel:SetJustifyH("LEFT")
-     CritTextFrameLabel:SetWidth(86)
-  end
-  
-  Critbar:SetMinMaxValues(0,92+combucritwidth)
-  Critbar:SetWidth(92+combucritwidth)
-  Combubar:SetMinMaxValues(0,92+combucritwidth)
-  Combubar:SetWidth(92+combucritwidth)
-  LBbar:SetMinMaxValues(0,28+combusettingstable["combubarwidth"])
-  LBbar:SetWidth(28+combusettingstable["combubarwidth"])
-  Ignbar:SetMinMaxValues(0,28+combusettingstable["combubarwidth"])
-  Ignbar:SetWidth(28+combusettingstable["combubarwidth"])
-  Pyrobar:SetMinMaxValues(0,28+combusettingstable["combubarwidth"])
-  Pyrobar:SetWidth(28+combusettingstable["combubarwidth"])
-  FFBbar:SetMinMaxValues(0,28+combusettingstable["combubarwidth"])
-  FFBbar:SetWidth(28+combusettingstable["combubarwidth"])
-  
-  if (combusettingstable["combulbtracker"] == true) then 
-    
-    LBtrackFrame:Show()
-        LBtrackFrame:SetFrameLevel((CombustionFrame:GetFrameLevel())-1)
+    CombustionFrame:SetHeight(48 + ffbheight + critheight)
+
+    if (combusettingstable["combubartimers"] == true) then
+        CombustionFrame:SetWidth(98 + combusettingstable["combubarwidth"] + 6)
+        CombustionTextFrame:SetWidth(98 + combusettingstable["combubarwidth"] + 6)
+        FFBTextFrameLabel:SetWidth(28 + combusettingstable["combubarwidth"] + 2)
+        FFBTextFrameLabel:SetJustifyH("RIGHT")
+        LBTextFrameLabel:SetWidth(28 + combusettingstable["combubarwidth"] + 2)
+        LBTextFrameLabel:SetJustifyH("RIGHT")
+        PyroTextFrameLabel:SetWidth(28 + combusettingstable["combubarwidth"] + 2)
+        PyroTextFrameLabel:SetJustifyH("RIGHT")
+        IgnTextFrameLabel:SetWidth(28 + combusettingstable["combubarwidth"] + 2)
+        IgnTextFrameLabel:SetJustifyH("RIGHT")
+        CritTextFrameLabel:SetWidth(91 + combusettingstable["combubarwidth"] + 2)
+        combucritwidth = combusettingstable["combubarwidth"]
+    else
+        combucritwidth = (-7)
+        CombustionFrame:SetWidth(98)
+        CombustionTextFrame:SetWidth(98)
+        FFBTextFrameLabel:SetWidth(28)
+        FFBbar:Hide()
+        FFBTextFrameLabel:SetJustifyH("LEFT")
+        LBTextFrameLabel:SetWidth(28)
+        LBbar:Hide()
+        LBTextFrameLabel:SetJustifyH("LEFT")
+        PyroTextFrameLabel:SetWidth(28)
+        Pyrobar:Hide()
+        PyroTextFrameLabel:SetJustifyH("LEFT")
+        Ignbar:Hide()
+        IgnTextFrameLabel:SetWidth(28)
+        IgnTextFrameLabel:SetJustifyH("LEFT")
+        CritTextFrameLabel:SetWidth(86)
+    end
+
+    Critbar:SetMinMaxValues(0, 92 + combucritwidth)
+    Critbar:SetWidth(92 + combucritwidth)
+    Combubar:SetMinMaxValues(0, 92 + combucritwidth)
+    Combubar:SetWidth(92 + combucritwidth)
+    LBbar:SetMinMaxValues(0, 28 + combusettingstable["combubarwidth"])
+    LBbar:SetWidth(28 + combusettingstable["combubarwidth"])
+    Ignbar:SetMinMaxValues(0, 28 + combusettingstable["combubarwidth"])
+    Ignbar:SetWidth(28 + combusettingstable["combubarwidth"])
+    Pyrobar:SetMinMaxValues(0, 28 + combusettingstable["combubarwidth"])
+    Pyrobar:SetWidth(28 + combusettingstable["combubarwidth"])
+    FFBbar:SetMinMaxValues(0, 28 + combusettingstable["combubarwidth"])
+    FFBbar:SetWidth(28 + combusettingstable["combubarwidth"])
+
+    if (combusettingstable["combulbtracker"] == true) then
+        LBtrackFrame:Show()
+        LBtrackFrame:SetFrameLevel((CombustionFrame:GetFrameLevel()) - 1)
         LBtrackFrame:ClearAllPoints()
 
-        if (combusettingstable["combulbup"] == true)
-            then LBtrackFrame:SetPoint("BOTTOM",CombustionFrame,"TOP",0,-6)
-                 LBtrackFrame:SetWidth((CombustionFrame:GetWidth())-10)
-        elseif (combusettingstable["combulbdown"] == true)
-            then LBtrackFrame:SetPoint("TOP",CombustionFrame,"BOTTOM",0,6)
-                 LBtrackFrame:SetWidth((CombustionFrame:GetWidth())-10)
-        elseif (combusettingstable["combulbright"] == true)
-            then LBtrackFrame:SetWidth(88)
-                 LBtrackFrame:SetPoint("TOPLEFT",CombustionFrame,"TOPRIGHT",-6,0)
-        elseif (combusettingstable["combulbleft"] == true)
-            then LBtrackFrame:SetWidth(88)
-                 LBtrackFrame:SetPoint("TOPRIGHT",CombustionFrame,"TOPLEFT",6,0)
+        if (combusettingstable["combulbup"] == true) then
+            LBtrackFrame:SetPoint("BOTTOM", CombustionFrame, "TOP", 0, -6)
+            LBtrackFrame:SetWidth((CombustionFrame:GetWidth()) - 10)
+        elseif (combusettingstable["combulbdown"] == true) then
+            LBtrackFrame:SetPoint("TOP", CombustionFrame, "BOTTOM", 0, 6)
+            LBtrackFrame:SetWidth((CombustionFrame:GetWidth()) - 10)
+        elseif (combusettingstable["combulbright"] == true) then
+            LBtrackFrame:SetWidth(88)
+            LBtrackFrame:SetPoint("TOPLEFT", CombustionFrame, "TOPRIGHT", -6, 0)
+        elseif (combusettingstable["combulbleft"] == true) then
+            LBtrackFrame:SetWidth(88)
+            LBtrackFrame:SetPoint("TOPRIGHT", CombustionFrame, "TOPLEFT", 6, 0)
         end
-        
-        LBtrackFrameText:SetWidth(LBtrackFrame:GetWidth())
-        LBtrackFrameText:SetPoint("TOPLEFT",LBtrackFrame,"TOPLEFT",0,0)
-        
-    else LBtrackFrame:Hide()
-  end
-    
-    for i = 1,5 do _G["LBtrack"..i]:SetWidth(LBtrackFrame:GetWidth()-41) end
-    for i = 1,5 do _G["LBtrack"..i.."Bar"]:SetWidth(LBtrackFrame:GetWidth()-12) end
-    for i = 1,5 do _G["LBtrack"..i.."Bar"]:SetMinMaxValues(0,LBtrackFrame:GetWidth()-12) end
-    for i = 1,#combuwidgetlist["bars"] do _G[(combuwidgetlist["bars"])[i]]:SetStatusBarTexture(CombuLSM:Fetch("statusbar",combusettingstable["combutexturename"])) end
-    for i = 1,#combuwidgetlist["text"] do 	_G[(combuwidgetlist["text"])[i]]:SetFont(CombuLSM:Fetch("font",combusettingstable["combufontname"]),select(2,_G[(combuwidgetlist["text"])[i]]:GetFont())) 
-    end   
 
-  CombuBackdropBuild ()
+        LBtrackFrameText:SetWidth(LBtrackFrame:GetWidth())
+        LBtrackFrameText:SetPoint("TOPLEFT", LBtrackFrame, "TOPLEFT", 0, 0)
+    else
+        LBtrackFrame:Hide()
+    end
+
+    for i = 1, 5 do
+        _G["LBtrack" .. i]:SetWidth(LBtrackFrame:GetWidth() - 41)
+    end
+    for i = 1, 5 do
+        _G["LBtrack" .. i .. "Bar"]:SetWidth(LBtrackFrame:GetWidth() - 12)
+    end
+    for i = 1, 5 do
+        _G["LBtrack" .. i .. "Bar"]:SetMinMaxValues(0, LBtrackFrame:GetWidth() - 12)
+    end
+    for i = 1, #combuwidgetlist["bars"] do
+        _G[(combuwidgetlist["bars"])[i]]:SetStatusBarTexture(
+            CombuLSM:Fetch("statusbar", combusettingstable["combutexturename"])
+        )
+    end
+    for i = 1, #combuwidgetlist["text"] do
+        _G[(combuwidgetlist["text"])[i]]:SetFont(
+            CombuLSM:Fetch("font", combusettingstable["combufontname"]),
+            select(2, _G[(combuwidgetlist["text"])[i]]:GetFont())
+        )
+    end
+
+    CombuBackdropBuild()
 
     --------------------------------------------
     --part for tick manager
-    
+
     --CombuTickGlobalBar:SetStatusBarTexture(CombuLSM:Fetch("statusbar",combusettingstable["combuticktexturename"]))
-    
 end
 
-function Combustionreset ()
-
-        table.wipe(LibTransition.tQueue) table.wipe(LibTransition.cQueue)
+function Combustionreset()
+    table.wipe(LibTransition.tQueue)
+    table.wipe(LibTransition.cQueue)
     CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
-        CombustionFrame:ClearAllPoints()
-        CombustionFrame:SetPoint("CENTER", UIParent, "CENTER" ,0,0)
-        CombustionFrame:SetScale(1)
-        
-        CombuTableCopy()
-    
-        ChatFrame1:AddMessage(CombuLoc["reset"])
-        CombustionFrameresize()
-        Combustionlock ()
+    CombustionFrame:ClearAllPoints()
+    CombustionFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    CombustionFrame:SetScale(1)
 
+    CombuTableCopy()
+
+    ChatFrame1:AddMessage(CombuLoc["reset"])
+    CombustionFrameresize()
+    Combustionlock()
 end
-  
+
 function CombuColorPicker(value, changedCallback)
+    local r, g, b, a = unpack(value)
 
-local r, g, b, a = unpack(value)
-
- ColorPickerFrame:SetColorRGB(r,g,b);
- ColorPickerFrame.hasOpacity, ColorPickerFrame.opacity = (a ~= nil), a;
- ColorPickerFrame.previousValues = {r,g,b,a};
- ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
-  changedCallback, changedCallback, changedCallback;
- ColorPickerFrame:Hide(); -- Need to run the OnShow handler.
- ColorPickerFrame:Show();
+    ColorPickerFrame:SetColorRGB(r, g, b)
+    ColorPickerFrame.hasOpacity, ColorPickerFrame.opacity = (a ~= nil), a
+    ColorPickerFrame.previousValues = {r, g, b, a}
+    ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc =
+        changedCallback,
+        changedCallback,
+        changedCallback
+    ColorPickerFrame:Hide() -- Need to run the OnShow handler.
+    ColorPickerFrame:Show()
 end
 
 function CombuColorCallback(restore)
- local newR, newG, newB, newA;
- if restore then
-  newR, newG, newB, newA = unpack(restore);
- else
-  newA, newR, newG, newB = OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB();
- end
- 
- (combusettingstable[combucolorinstance])[1], (combusettingstable[combucolorinstance])[2], (combusettingstable[combucolorinstance])[3], (combusettingstable[combucolorinstance])[4] = newR, newG, newB, newA;
- _G["Combu"..combucolorinstance.."SwatchTexture"]:SetVertexColor(unpack(combusettingstable[combucolorinstance]))
-end
-
-function CombuSavedVariablesConvert ()
-
-    if combuffb then combusettingstable["combuffb"] = combuffb end
-    if combuautohide then combusettingstable["combuautohide"] = combuautohide end
-    if combuimpact then combusettingstable["combuimpact"] = combuimpact end
-    if combuscale then combusettingstable["combuscale"] = combuscale end
-    if combubeforefade then combusettingstable["combubeforefade"] = combubeforefade end
-    if combuafterfade then combusettingstable["combuafterfade"] = combuafterfade end
-    if combufadeoutspeed then combusettingstable["combufadeoutspeed"] = combufadeoutspeed end
-    if combufadeinspeed then combusettingstable["combufadeinspeed"] = combufadeinspeed end
-    if combuwaitfade then combusettingstable["combuwaitfade"] = combuwaitfade end
-    if combufadealpha then combusettingstable["combufadealpha"] = combufadealpha end
-    if combubartimers then combusettingstable["combubartimers"] = combubartimers end
-  if combubarwidth then combusettingstable["combubarwidth"] = combubarwidth end
-  if combucrit then combusettingstable["combucrit"] = combucrit end
-  if comburefreshmode then combusettingstable["comburefreshmode"] = comburefreshmode end
-    if combureport then combusettingstable["combureport"] = combureport end
-    if combureportvalue then combusettingstable["combureportvalue"] = combureportvalue end
-    if combureportthreshold then combusettingstable["combureportthreshold"] = combureportthreshold end
-    if combureportpyro then combusettingstable["combureportpyro"] = combureportpyro end
-    if combutrack then combusettingstable["combutrack"] = combutrack end
-    if combuchat then combusettingstable["combuchat"] = combuchat end
-    if combulbtracker then combusettingstable["combulbtracker"] = combulbtracker end
-    if combulbtarget then combusettingstable["combulbtarget"] = combulbtarget end
-    if combulbup then combusettingstable["combulbup"] = combulbup end
-    if combulbdown then combusettingstable["combulbdown"] = combulbdown end
-    if combulbright then combusettingstable["combulbright"] = combulbup end
-    if combulbleft then combusettingstable["combulbleft"] = combulbleft end
-    if combutimervalue then combusettingstable["combutimervalue"] = combutimervalue end
-    if combuignitereport then combusettingstable["combuignitereport"] = combuignitereport end
-    if combuignitedelta then combusettingstable["combuignitedelta"] = combuignitedelta end
-    if combuignitepredict then combusettingstable["combuignitepredict"] = combuignitepredict end
-    if combureportmunching then combusettingstable["combureportmunching"] = combureportmunching end
-    if combuflamestrike then combusettingstable["combuflamestrike"] = combuflamestrike end
-    if combutexturename then combusettingstable["combutexturename"] = combutexturename end
-    if combufontname then combusettingstable["combufontname"] = combufontname end
-    
-  for k,v in pairs(combudefaultsettingstable) do -- fill the combusettingstable with missing info from default table
-    if combusettingstable[k] == nil then 
-      if type(v) == "table" then
-        combusettingstable[k] = {}
-        for i = 1,#v do
-          table.insert(combusettingstable[k],v[i])
-        end
-      else combusettingstable[k] = v 
-      end
+    local newR, newG, newB, newA
+    if restore then
+        newR, newG, newB, newA = unpack(restore)
+    else
+        newA, newR, newG, newB = OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB()
     end
-  end
 
-  
-  
+    (combusettingstable[combucolorinstance])[1],
+        (combusettingstable[combucolorinstance])[2],
+        (combusettingstable[combucolorinstance])[3],
+        (combusettingstable[combucolorinstance])[4] = newR, newG, newB, newA
+    _G["Combu" .. combucolorinstance .. "SwatchTexture"]:SetVertexColor(unpack(combusettingstable[combucolorinstance]))
 end
 
-local function Combuffbglyphcheck ()
+function CombuSavedVariablesConvert()
+    if combuffb then
+        combusettingstable["combuffb"] = combuffb
+    end
+    if combuautohide then
+        combusettingstable["combuautohide"] = combuautohide
+    end
+    if combuimpact then
+        combusettingstable["combuimpact"] = combuimpact
+    end
+    if combuscale then
+        combusettingstable["combuscale"] = combuscale
+    end
+    if combubeforefade then
+        combusettingstable["combubeforefade"] = combubeforefade
+    end
+    if combuafterfade then
+        combusettingstable["combuafterfade"] = combuafterfade
+    end
+    if combufadeoutspeed then
+        combusettingstable["combufadeoutspeed"] = combufadeoutspeed
+    end
+    if combufadeinspeed then
+        combusettingstable["combufadeinspeed"] = combufadeinspeed
+    end
+    if combuwaitfade then
+        combusettingstable["combuwaitfade"] = combuwaitfade
+    end
+    if combufadealpha then
+        combusettingstable["combufadealpha"] = combufadealpha
+    end
+    if combubartimers then
+        combusettingstable["combubartimers"] = combubartimers
+    end
+    if combubarwidth then
+        combusettingstable["combubarwidth"] = combubarwidth
+    end
+    if combucrit then
+        combusettingstable["combucrit"] = combucrit
+    end
+    if comburefreshmode then
+        combusettingstable["comburefreshmode"] = comburefreshmode
+    end
+    if combureport then
+        combusettingstable["combureport"] = combureport
+    end
+    if combureportvalue then
+        combusettingstable["combureportvalue"] = combureportvalue
+    end
+    if combureportthreshold then
+        combusettingstable["combureportthreshold"] = combureportthreshold
+    end
+    if combureportpyro then
+        combusettingstable["combureportpyro"] = combureportpyro
+    end
+    if combutrack then
+        combusettingstable["combutrack"] = combutrack
+    end
+    if combuchat then
+        combusettingstable["combuchat"] = combuchat
+    end
+    if combulbtracker then
+        combusettingstable["combulbtracker"] = combulbtracker
+    end
+    if combulbtarget then
+        combusettingstable["combulbtarget"] = combulbtarget
+    end
+    if combulbup then
+        combusettingstable["combulbup"] = combulbup
+    end
+    if combulbdown then
+        combusettingstable["combulbdown"] = combulbdown
+    end
+    if combulbright then
+        combusettingstable["combulbright"] = combulbup
+    end
+    if combulbleft then
+        combusettingstable["combulbleft"] = combulbleft
+    end
+    if combutimervalue then
+        combusettingstable["combutimervalue"] = combutimervalue
+    end
+    if combuignitereport then
+        combusettingstable["combuignitereport"] = combuignitereport
+    end
+    if combuignitedelta then
+        combusettingstable["combuignitedelta"] = combuignitedelta
+    end
+    if combuignitepredict then
+        combusettingstable["combuignitepredict"] = combuignitepredict
+    end
+    if combureportmunching then
+        combusettingstable["combureportmunching"] = combureportmunching
+    end
+    if combuflamestrike then
+        combusettingstable["combuflamestrike"] = combuflamestrike
+    end
+    if combutexturename then
+        combusettingstable["combutexturename"] = combutexturename
+    end
+    if combufontname then
+        combusettingstable["combufontname"] = combufontname
+    end
 
-        local enabled1,_,_,id1 = GetGlyphSocketInfo(7)
-        local enabled4,_,_,id4 = GetGlyphSocketInfo(8)
-        local enabled6,_,_,id6 = GetGlyphSocketInfo(9)
-         
-              if (id1 == 61205) and (ffbglyph == false) and (combutalent == true) 
-              then ffbglyph = true
-                     combusettingstable["combuffb"] = true
-                  CombustionFrameresize()
-                   if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbglyphon"]) end
-              
-              elseif (id4 == 61205) and (ffbglyph == false) and (combutalent == true) 
-              then ffbglyph = true
-                     combusettingstable["combuffb"] = true
-                  CombustionFrameresize()
-                   if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbglyphon"]) end
-              
-              elseif (id6 == 61205) and (ffbglyph == false) and (combutalent == true) 
-              then ffbglyph = true
-                     combusettingstable["combuffb"] = true
-                  CombustionFrameresize()
-                   if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbglyphon"]) end
-        
-        elseif (id1 ~= 61205) and (id4 ~= 61205) and (id6 ~= 61205) and (ffbglyph == true) and (combutalent == true)
-        then ffbglyph = false
-           CombustionFrameresize()
-                   if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbglyphoff"]) end
-              
-                elseif (id1 ~= 61205) and (id4 ~= 61205) and (id6 ~= 61205) and (combusettingstable["combuffb"] == true) 
-        then ffbglyph = false
-           CombustionFrameresize()
-                   if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(CombuLoc["ffbglyphoff"]) end
+    for k, v in pairs(combudefaultsettingstable) do -- fill the combusettingstable with missing info from default table
+        if combusettingstable[k] == nil then
+            if type(v) == "table" then
+                combusettingstable[k] = {}
+                for i = 1, #v do
+                    table.insert(combusettingstable[k], v[i])
+                end
+            else
+                combusettingstable[k] = v
+            end
+        end
+    end
+end
 
-                elseif (ffbglyph == false)
-              then CombustionFrameresize()
+local function Combuffbglyphcheck()
+    local enabled1, _, _, id1 = GetGlyphSocketInfo(7)
+    local enabled4, _, _, id4 = GetGlyphSocketInfo(8)
+    local enabled6, _, _, id6 = GetGlyphSocketInfo(9)
 
-              end 
+    if (id1 == 61205) and (ffbglyph == false) and (combutalent == true) then
+        ffbglyph = true
+        combusettingstable["combuffb"] = true
+        CombustionFrameresize()
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbglyphon"])
+        end
+    elseif (id4 == 61205) and (ffbglyph == false) and (combutalent == true) then
+        ffbglyph = true
+        combusettingstable["combuffb"] = true
+        CombustionFrameresize()
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbglyphon"])
+        end
+    elseif (id6 == 61205) and (ffbglyph == false) and (combutalent == true) then
+        ffbglyph = true
+        combusettingstable["combuffb"] = true
+        CombustionFrameresize()
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbglyphon"])
+        end
+    elseif (id1 ~= 61205) and (id4 ~= 61205) and (id6 ~= 61205) and (ffbglyph == true) and (combutalent == true) then
+        ffbglyph = false
+        CombustionFrameresize()
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbglyphoff"])
+        end
+    elseif (id1 ~= 61205) and (id4 ~= 61205) and (id6 ~= 61205) and (combusettingstable["combuffb"] == true) then
+        ffbglyph = false
+        CombustionFrameresize()
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(CombuLoc["ffbglyphoff"])
+        end
+    elseif (ffbglyph == false) then
+        CombustionFrameresize()
+    end
 end
 
 local CombuCritMeta = {
-  34220, -- burning crusade
-  41285, -- wrath of the lich king
-  52291, -- cataclysm
+    34220, -- burning crusade
+    41285, -- wrath of the lich king
+    52291, -- cataclysm
     68780
-};
+}
 
 function CombuCreateTextureList(dropdown, settings)
-
     combutexturesettings = settings
     combutexturedropdown = dropdown
-    
-    CombuTextureList = {} for k in pairs(CombuLSM:HashTable("statusbar")) do tinsert(CombuTextureList,k) end
-    
+
+    CombuTextureList = {}
+    for k in pairs(CombuLSM:HashTable("statusbar")) do
+        tinsert(CombuTextureList, k)
+    end
+
     CombuTextureBorderFrame:Show()
     CombuTextureBorderFrame:ClearAllPoints()
-    CombuTextureFrame:SetHeight(#CombuTextureList*20)
-    CombuTextureBorderFrame:SetPoint("CENTER",dropdown,"CENTER",0,0-(CombuTextureFrame:GetHeight()/4))
+    CombuTextureFrame:SetHeight(#CombuTextureList * 20)
+    CombuTextureBorderFrame:SetPoint("CENTER", dropdown, "CENTER", 0, 0 - (CombuTextureFrame:GetHeight() / 4))
     CombuTextureBorderFrame:SetParent(dropdown)
-    CombuTextureBorderFrame:SetFrameLevel(_G[dropdown:GetName().."Button"]:GetFrameLevel()+1)
+    CombuTextureBorderFrame:SetFrameLevel(_G[dropdown:GetName() .. "Button"]:GetFrameLevel() + 1)
     CombuTextureBorderFrame:SetScale(1.3)
-    
-    for i = 1,#CombuTextureList do
-    
-        CreateFrame("button", "CombuTexture"..i, CombuTextureFrame, "CombuTextureTemplate")
-        
+
+    for i = 1, #CombuTextureList do
+        CreateFrame("button", "CombuTexture" .. i, CombuTextureFrame, "CombuTextureTemplate")
+
         if i == 1 then
             CombuTexture1:ClearAllPoints()
-            CombuTexture1:SetPoint("TOP",CombuTextureFrame,"TOP",0,0)
-        else _G["CombuTexture"..i]:ClearAllPoints()
-             _G["CombuTexture"..i]:SetPoint("TOP",_G["CombuTexture"..i-1],"BOTTOM",0,0)
+            CombuTexture1:SetPoint("TOP", CombuTextureFrame, "TOP", 0, 0)
+        else
+            _G["CombuTexture" .. i]:ClearAllPoints()
+            _G["CombuTexture" .. i]:SetPoint("TOP", _G["CombuTexture" .. i - 1], "BOTTOM", 0, 0)
         end
-        
-        _G["CombuTexture"..i.."Bar"]:SetTexture(CombuLSM:Fetch("statusbar",CombuTextureList[i]))
-        _G["CombuTexture"..i.."Bar"]:SetVertexColor(unpack(combusettingstable["barcolornormal"]))
-        _G["CombuTexture"..i.."Text"]:SetText(CombuTextureList[i])
-        
-        if (CombuTextureList[i]) == combusettingstable[settings] then
-            _G["CombuTexture"..i.."Text"]:SetTextColor(1,0.8,0.2,1)
-        else _G["CombuTexture"..i.."Text"]:SetTextColor(1,1,1,1)
-        end
-    
-    end
-    
-end
-            
-function CombuCreateFontList()
 
-    CombuFontList = {} for k in pairs(CombuLSM:HashTable("font")) do tinsert(CombuFontList,k) end
-    
+        _G["CombuTexture" .. i .. "Bar"]:SetTexture(CombuLSM:Fetch("statusbar", CombuTextureList[i]))
+        _G["CombuTexture" .. i .. "Bar"]:SetVertexColor(unpack(combusettingstable["barcolornormal"]))
+        _G["CombuTexture" .. i .. "Text"]:SetText(CombuTextureList[i])
+
+        if (CombuTextureList[i]) == combusettingstable[settings] then
+            _G["CombuTexture" .. i .. "Text"]:SetTextColor(1, 0.8, 0.2, 1)
+        else
+            _G["CombuTexture" .. i .. "Text"]:SetTextColor(1, 1, 1, 1)
+        end
+    end
+end
+
+function CombuCreateFontList()
+    CombuFontList = {}
+    for k in pairs(CombuLSM:HashTable("font")) do
+        tinsert(CombuFontList, k)
+    end
+
     CombuFontBorderFrame:Show()
     CombuFontBorderFrame:ClearAllPoints()
-    CombuFontFrame:SetHeight(#CombuFontList*15)
-    CombuFontBorderFrame:SetPoint("CENTER",CombuFontDropDown,"CENTER",0,0-(CombuFontFrame:GetHeight()/4))
+    CombuFontFrame:SetHeight(#CombuFontList * 15)
+    CombuFontBorderFrame:SetPoint("CENTER", CombuFontDropDown, "CENTER", 0, 0 - (CombuFontFrame:GetHeight() / 4))
     CombuFontBorderFrame:SetParent(CombuFontDropDown)
-    CombuFontBorderFrame:SetFrameLevel(CombuFontDropDownButton:GetFrameLevel()+1)
+    CombuFontBorderFrame:SetFrameLevel(CombuFontDropDownButton:GetFrameLevel() + 1)
     CombuFontBorderFrame:SetScale(1.3)
- 
-    for i = 1,#CombuFontList do
-    
-        CreateFrame("button", "CombuFont"..i, CombuFontFrame, "CombuFontTemplate")
-        
+
+    for i = 1, #CombuFontList do
+        CreateFrame("button", "CombuFont" .. i, CombuFontFrame, "CombuFontTemplate")
+
         if i == 1 then
             CombuFont1:ClearAllPoints()
-            CombuFont1:SetPoint("TOP",CombuFontFrame,"TOP",0,0)
-        else _G["CombuFont"..i]:ClearAllPoints()
-             _G["CombuFont"..i]:SetPoint("TOP",_G["CombuFont"..i-1],"BOTTOM",0,0)
+            CombuFont1:SetPoint("TOP", CombuFontFrame, "TOP", 0, 0)
+        else
+            _G["CombuFont" .. i]:ClearAllPoints()
+            _G["CombuFont" .. i]:SetPoint("TOP", _G["CombuFont" .. i - 1], "BOTTOM", 0, 0)
         end
-        
-        _G["CombuFont"..i.."Bar"]:SetTexture(CombuLSM:Fetch("statusbar",combusettingstable["combutexturename"]))
-        _G["CombuFont"..i.."Bar"]:SetVertexColor(unpack(combusettingstable["barcolornormal"]))
-        _G["CombuFont"..i.."Text"]:SetText(CombuFontList[i])
-        _G["CombuFont"..i.."Text"]:SetFont(CombuLSM:Fetch("font",CombuFontList[i]),9)
-        
+
+        _G["CombuFont" .. i .. "Bar"]:SetTexture(CombuLSM:Fetch("statusbar", combusettingstable["combutexturename"]))
+        _G["CombuFont" .. i .. "Bar"]:SetVertexColor(unpack(combusettingstable["barcolornormal"]))
+        _G["CombuFont" .. i .. "Text"]:SetText(CombuFontList[i])
+        _G["CombuFont" .. i .. "Text"]:SetFont(CombuLSM:Fetch("font", CombuFontList[i]), 9)
+
         if CombuFontList[i] == combusettingstable["combufontname"] then
-            _G["CombuFont"..i.."Text"]:SetTextColor(1,0.8,0.2,1)
-        else _G["CombuFont"..i.."Text"]:SetTextColor(1,1,1,1)
+            _G["CombuFont" .. i .. "Text"]:SetTextColor(1, 0.8, 0.2, 1)
+        else
+            _G["CombuFont" .. i .. "Text"]:SetTextColor(1, 1, 1, 1)
         end
-    
     end
-    
 end
 
 function CombuCreateSoundList()
+    CombuSoundList = {}
+    for k in pairs(CombuLSM:HashTable("sound")) do
+        tinsert(CombuSoundList, k)
+    end
 
-    CombuSoundList = {} for k in pairs(CombuLSM:HashTable("sound")) do tinsert(CombuSoundList,k) end
-    
     CombuSoundBorderFrame:Show()
     CombuSoundBorderFrame:ClearAllPoints()
-    CombuSoundFrame:SetHeight(#CombuSoundList*15)
-    CombuSoundBorderFrame:SetPoint("CENTER",CombuSoundDropDown,"CENTER",0,0-(CombuSoundFrame:GetHeight()/4))
+    CombuSoundFrame:SetHeight(#CombuSoundList * 15)
+    CombuSoundBorderFrame:SetPoint("CENTER", CombuSoundDropDown, "CENTER", 0, 0 - (CombuSoundFrame:GetHeight() / 4))
     CombuSoundBorderFrame:SetParent(CombuSoundDropDown)
-    CombuSoundBorderFrame:SetFrameLevel(CombuSoundDropDownButton:GetFrameLevel()+1)
+    CombuSoundBorderFrame:SetFrameLevel(CombuSoundDropDownButton:GetFrameLevel() + 1)
     CombuSoundBorderFrame:SetScale(1.3)
- 
-    for i = 1,#CombuSoundList do
-    
-        CreateFrame("button", "CombuSound"..i, CombuSoundFrame, "CombuSoundTemplate")
-        _G["CombuSound"..i]:SetID(i)
-        
+
+    for i = 1, #CombuSoundList do
+        CreateFrame("button", "CombuSound" .. i, CombuSoundFrame, "CombuSoundTemplate")
+        _G["CombuSound" .. i]:SetID(i)
+
         if i == 1 then
             CombuSound1:ClearAllPoints()
-            CombuSound1:SetPoint("TOP",CombuSoundFrame,"TOP",0,0)
-        else _G["CombuSound"..i]:ClearAllPoints()
-             _G["CombuSound"..i]:SetPoint("TOP",_G["CombuSound"..i-1],"BOTTOM",0,0)
+            CombuSound1:SetPoint("TOP", CombuSoundFrame, "TOP", 0, 0)
+        else
+            _G["CombuSound" .. i]:ClearAllPoints()
+            _G["CombuSound" .. i]:SetPoint("TOP", _G["CombuSound" .. i - 1], "BOTTOM", 0, 0)
         end
-        
-        _G["CombuSound"..i.."Text"]:SetText(CombuSoundList[i])
-        
+
+        _G["CombuSound" .. i .. "Text"]:SetText(CombuSoundList[i])
+
         if CombuSoundList[i] == combusettingstable["combusoundname"] then
-            _G["CombuSound"..i.."Text"]:SetTextColor(1,0.8,0.2,1)
-        else _G["CombuSound"..i.."Text"]:SetTextColor(1,1,1,1)
+            _G["CombuSound" .. i .. "Text"]:SetTextColor(1, 0.8, 0.2, 1)
+        else
+            _G["CombuSound" .. i .. "Text"]:SetTextColor(1, 1, 1, 1)
         end
-    
     end
-    
 end
 
 function CombuCreateBorderList()
+    CombuBorderList = {}
+    for k in pairs(CombuLSM:HashTable("border")) do
+        tinsert(CombuBorderList, k)
+    end
 
-    CombuBorderList = {} for k in pairs(CombuLSM:HashTable("border")) do tinsert(CombuBorderList,k) end
-       
     CombuEdgeBorderFrame:Show()
     CombuEdgeBorderFrame:ClearAllPoints()
-    CombuEdgeFrame:SetHeight(#CombuBorderList*32)
-    CombuEdgeBorderFrame:SetPoint("CENTER",CombuBorderDropDown,"CENTER",0,0-(CombuEdgeFrame:GetHeight()/4))
+    CombuEdgeFrame:SetHeight(#CombuBorderList * 32)
+    CombuEdgeBorderFrame:SetPoint("CENTER", CombuBorderDropDown, "CENTER", 0, 0 - (CombuEdgeFrame:GetHeight() / 4))
     CombuEdgeBorderFrame:SetParent(CombuBorderDropDown)
-    CombuEdgeBorderFrame:SetFrameLevel(CombuBorderDropDownButton:GetFrameLevel()+1)
+    CombuEdgeBorderFrame:SetFrameLevel(CombuBorderDropDownButton:GetFrameLevel() + 1)
     CombuEdgeBorderFrame:SetScale(1.3)
-    
-    for i = 1,#CombuBorderList do
-    
-        CreateFrame("button", "CombuBorder"..i, CombuEdgeFrame, "CombuEdgeTemplate")
-        
+
+    for i = 1, #CombuBorderList do
+        CreateFrame("button", "CombuBorder" .. i, CombuEdgeFrame, "CombuEdgeTemplate")
+
         if i == 1 then
             CombuBorder1:ClearAllPoints()
-            CombuBorder1:SetPoint("TOP",CombuEdgeFrame,"TOP",0,0)
-        else _G["CombuBorder"..i]:ClearAllPoints()
-             _G["CombuBorder"..i]:SetPoint("TOP",_G["CombuBorder"..i-1],"BOTTOM",0,0)
+            CombuBorder1:SetPoint("TOP", CombuEdgeFrame, "TOP", 0, 0)
+        else
+            _G["CombuBorder" .. i]:ClearAllPoints()
+            _G["CombuBorder" .. i]:SetPoint("TOP", _G["CombuBorder" .. i - 1], "BOTTOM", 0, 0)
         end
-        
-        _G["CombuBorder"..i.."Bar"]:SetTexture(CombuLSM:Fetch("border",CombuBorderList[i]))
-        _G["CombuBorder"..i.."Bar"]:SetVertexColor(unpack(combusettingstable["edgecolornormal"]))
-        _G["CombuBorder"..i.."Text"]:SetText(CombuBorderList[i])
-        
+
+        _G["CombuBorder" .. i .. "Bar"]:SetTexture(CombuLSM:Fetch("border", CombuBorderList[i]))
+        _G["CombuBorder" .. i .. "Bar"]:SetVertexColor(unpack(combusettingstable["edgecolornormal"]))
+        _G["CombuBorder" .. i .. "Text"]:SetText(CombuBorderList[i])
+
         if CombuBorderList[i] == combuBorder then
-            _G["CombuBorder"..i.."Text"]:SetTextColor(1,0.8,0.2,1)
-        else _G["CombuBorder"..i.."Text"]:SetTextColor(1,1,1,1)
+            _G["CombuBorder" .. i .. "Text"]:SetTextColor(1, 0.8, 0.2, 1)
+        else
+            _G["CombuBorder" .. i .. "Text"]:SetTextColor(1, 1, 1, 1)
         end
-    
     end
-    
 end
 
 function CombuCreateBackgroundList()
+    CombuBackgroundList = {}
+    for k in pairs(CombuLSM:HashTable("background")) do
+        tinsert(CombuBackgroundList, k)
+    end
 
-    CombuBackgroundList = {} for k in pairs(CombuLSM:HashTable("background")) do tinsert(CombuBackgroundList,k) end
-     
     CombuBgBorderFrame:Show()
     CombuBgBorderFrame:ClearAllPoints()
-    CombuBgFrame:SetHeight(#CombuBackgroundList*30)
-    CombuBgBorderFrame:SetPoint("CENTER",CombuBackgroundDropDown,"CENTER",0,0-(CombuBgFrame:GetHeight()/4))
+    CombuBgFrame:SetHeight(#CombuBackgroundList * 30)
+    CombuBgBorderFrame:SetPoint("CENTER", CombuBackgroundDropDown, "CENTER", 0, 0 - (CombuBgFrame:GetHeight() / 4))
     CombuBgBorderFrame:SetParent(CombuBackgroundDropDown)
-    CombuBgBorderFrame:SetFrameLevel(CombuBackgroundDropDownButton:GetFrameLevel()+1)
+    CombuBgBorderFrame:SetFrameLevel(CombuBackgroundDropDownButton:GetFrameLevel() + 1)
     CombuBgBorderFrame:SetScale(1.3)
-    
-    for i = 1,#CombuBackgroundList do
-    
-        CreateFrame("button", "CombuBackground"..i, CombuBgFrame, "CombuBgTemplate")
-        
+
+    for i = 1, #CombuBackgroundList do
+        CreateFrame("button", "CombuBackground" .. i, CombuBgFrame, "CombuBgTemplate")
+
         if i == 1 then
             CombuBackground1:ClearAllPoints()
-            CombuBackground1:SetPoint("TOP",CombuBgFrame,"TOP",0,0)
-        else _G["CombuBackground"..i]:ClearAllPoints()
-             _G["CombuBackground"..i]:SetPoint("TOP",_G["CombuBackground"..i-1],"BOTTOM",0,0)
+            CombuBackground1:SetPoint("TOP", CombuBgFrame, "TOP", 0, 0)
+        else
+            _G["CombuBackground" .. i]:ClearAllPoints()
+            _G["CombuBackground" .. i]:SetPoint("TOP", _G["CombuBackground" .. i - 1], "BOTTOM", 0, 0)
         end
-        
-        _G["CombuBackground"..i.."Bar"]:SetTexture(CombuLSM:Fetch("background",CombuBackgroundList[i]))
-        _G["CombuBackground"..i.."Text"]:SetText(CombuBackgroundList[i])
-        
+
+        _G["CombuBackground" .. i .. "Bar"]:SetTexture(CombuLSM:Fetch("background", CombuBackgroundList[i]))
+        _G["CombuBackground" .. i .. "Text"]:SetText(CombuBackgroundList[i])
+
         if CombuBackgroundList[i] == combuBackground then
-            _G["CombuBackground"..i.."Text"]:SetTextColor(1,0.8,0.2,1)
-        else _G["CombuBackground"..i.."Text"]:SetTextColor(1,1,1,1)
+            _G["CombuBackground" .. i .. "Text"]:SetTextColor(1, 0.8, 0.2, 1)
+        else
+            _G["CombuBackground" .. i .. "Text"]:SetTextColor(1, 1, 1, 1)
         end
-    
     end
-    
 end
 
 -------------------------------
 --Helper function for living bomb tracking expiration time collecting
 local function CombuLBauratracker(targetguid, targetname, eventgettime)
-
-  lbraidcheck = 0
-  lbtablerefresh = 0
+    lbraidcheck = 0
+    lbtablerefresh = 0
     lbgroupsuffix = nil
     lbtargetsuffix = nil
-    
-    if (GetNumRaidMembers() ~= 0) 
-        then lbgroupsuffix = "raid"
-             lbgroupnumber = GetNumRaidMembers()
-    elseif (GetNumPartyMembers() ~= 0)
-        then lbgroupsuffix = "party"
-             lbgroupnumber = GetNumPartyMembers()
+
+    if (GetNumRaidMembers() ~= 0) then
+        lbgroupsuffix = "raid"
+        lbgroupnumber = GetNumRaidMembers()
+    elseif (GetNumPartyMembers() ~= 0) then
+        lbgroupsuffix = "party"
+        lbgroupnumber = GetNumPartyMembers()
     end
-    
-    if (UnitGUID("target") == targetguid)
-        then lbtargetsuffix = "target"
-    elseif (UnitGUID("mouseover") == targetguid)
-        then lbtargetsuffix = "mouseover"
-    elseif (UnitGUID("focus") == targetguid)
-        then lbtargetsuffix = "focus"
+
+    if (UnitGUID("target") == targetguid) then
+        lbtargetsuffix = "target"
+    elseif (UnitGUID("mouseover") == targetguid) then
+        lbtargetsuffix = "mouseover"
+    elseif (UnitGUID("focus") == targetguid) then
+        lbtargetsuffix = "focus"
     end
-        
-    if combuimpacttimer and ((combuimpacttimer + 1) >= GetTime())
-        then local a12,b12,c12,d12,e12,f12,g12,h12,i12,j12,k12 = UnitAura("target", lvb, nil, "PLAYER HARMFUL")
-             for z = 1, #LBtrackertable do
-             
-                if ((LBtrackertable[z])[1] == targetguid) 
-                    then (LBtrackertable[z])[3] = g12;
-                         (LBtrackertable[z])[4] = f12;
-                         (LBtrackertable[z])[5] = nil
-                         lbtablerefresh = 1
-                         break
-                end 
-             end
-             
-             if (lbtablerefresh == 1) then
-             else table.insert(LBtrackertable, {targetguid, targetname, g12, f12})
-             end
-             
-             lbraidcheck = 1
-        
-  elseif lbtargetsuffix and (UnitGUID(lbtargetsuffix) == targetguid)
-        then local a12,b12,c12,d12,e12,f12,g12,h12,i12,j12,k12 = UnitAura(lbtargetsuffix, lvb, nil, "PLAYER HARMFUL")
-             for z = 1, #LBtrackertable do
-             
-                if ((LBtrackertable[z])[1] == targetguid) 
-                    then (LBtrackertable[z])[3] = g12;
-                         (LBtrackertable[z])[4] = f12;
-                         (LBtrackertable[z])[5] = GetRaidTargetIndex(lbtargetsuffix)
-                         lbtablerefresh = 1
-                         break
-                end 
-             end
-             
-             if (lbtablerefresh == 1) then
-             else table.insert(LBtrackertable, {targetguid, targetname, g12, f12, GetRaidTargetIndex(lbtargetsuffix)})
-             end
-             
-             lbraidcheck = 1
-        
+
+    if combuimpacttimer and ((combuimpacttimer + 1) >= GetTime()) then
+        local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 = UnitAura("target", lvb, nil, "PLAYER HARMFUL")
+        for z = 1, #LBtrackertable do
+            if ((LBtrackertable[z])[1] == targetguid) then
+                (LBtrackertable[z])[3] = g12
+                (LBtrackertable[z])[4] = f12
+                (LBtrackertable[z])[5] = nil
+                lbtablerefresh = 1
+                break
+            end
+        end
+
+        if (lbtablerefresh == 1) then
+        else
+            table.insert(LBtrackertable, {targetguid, targetname, g12, f12})
+        end
+
+        lbraidcheck = 1
+    elseif lbtargetsuffix and (UnitGUID(lbtargetsuffix) == targetguid) then
+        local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 =
+            UnitAura(lbtargetsuffix, lvb, nil, "PLAYER HARMFUL")
+        for z = 1, #LBtrackertable do
+            if ((LBtrackertable[z])[1] == targetguid) then
+                (LBtrackertable[z])[3] = g12
+                (LBtrackertable[z])[4] = f12
+                (LBtrackertable[z])[5] = GetRaidTargetIndex(lbtargetsuffix)
+                lbtablerefresh = 1
+                break
+            end
+        end
+
+        if (lbtablerefresh == 1) then
+        else
+            table.insert(LBtrackertable, {targetguid, targetname, g12, f12, GetRaidTargetIndex(lbtargetsuffix)})
+        end
+
+        lbraidcheck = 1
     elseif lbgroupsuffix then
         for i = 1, lbgroupnumber do -- first we check if a raid or party members target the LB's target to have an accurate expiration time with UnitAura
-            
-            if (UnitGUID(lbgroupsuffix..i.."-target") == targetguid) 
-                then local a12,b12,c12,d12,e12,f12,g12,h12,i12,j12,k12 = UnitAura(lbgroupsuffix..i.."-target", lvb, nil, "PLAYER HARMFUL")
-                     
-                     for z = 1, #LBtrackertable do
-                     
-                        if ((LBtrackertable[z])[1] == targetguid) 
-                            then (LBtrackertable[z])[3] = g12;
-                                 (LBtrackertable[z])[4] = f12;
-                                 (LBtrackertable[z])[5] = GetRaidTargetIndex(lbgroupsuffix..i.."-target")
-                                 lbtablerefresh = 1
-                                 break
-                        end 
-                     end
-                     
-                     if (lbtablerefresh == 1) then
-                     else table.insert(LBtrackertable, {targetguid, targetname, g12, f12, GetRaidTargetIndex(lbgroupsuffix..i.."-target")})
-                     end
-                     
-                     lbraidcheck = 1
-                
+            if (UnitGUID(lbgroupsuffix .. i .. "-target") == targetguid) then
+                local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 =
+                    UnitAura(lbgroupsuffix .. i .. "-target", lvb, nil, "PLAYER HARMFUL")
+
+                for z = 1, #LBtrackertable do
+                    if ((LBtrackertable[z])[1] == targetguid) then
+                        (LBtrackertable[z])[3] = g12
+                        (LBtrackertable[z])[4] = f12
+                        (LBtrackertable[z])[5] = GetRaidTargetIndex(lbgroupsuffix .. i .. "-target")
+                        lbtablerefresh = 1
+                        break
+                    end
+                end
+
+                if (lbtablerefresh == 1) then
+                else
+                    table.insert(
+                        LBtrackertable,
+                        {targetguid, targetname, g12, f12, GetRaidTargetIndex(lbgroupsuffix .. i .. "-target")}
+                    )
+                end
+
+                lbraidcheck = 1
             end
         end
     end
-   
-   if (lbraidcheck == 0) -- info with UnitAura have been collected, skipping this part.
-        then for z = 1, #LBtrackertable do -- no raid members targetting the LB's target so using GetTime from event fired and 12 secs as duration
-                 
-                if ((LBtrackertable[z])[1] == targetguid) 
-                    then (LBtrackertable[z])[3] = (eventgettime + 12);
-                         (LBtrackertable[z])[4] = 12;
-                         (LBtrackertable[z])[5] = nil
-                         lbtablerefresh = 1
-                         break
-                end 
-             end
-                     
-             if (lbtablerefresh == 1) then
-             else table.insert(LBtrackertable, {targetguid, targetname, (eventgettime + 12), 12, nil})
-             end
-  end
-  
-  for i = 6,1,-1 do
-      if LBtrackertable[i] and (((LBtrackertable[i])[1] == 2120) or ((LBtrackertable[i])[1] == 88148)) then 
-        table.insert(LBtrackertable,{(LBtrackertable[i])[1],(LBtrackertable[i])[2],(LBtrackertable[i])[3],(LBtrackertable[i])[4]});
-        table.remove(LBtrackertable,i);
-      end
+
+    if (lbraidcheck == 0) then -- info with UnitAura have been collected, skipping this part.
+        for z = 1, #LBtrackertable do -- no raid members targetting the LB's target so using GetTime from event fired and 12 secs as duration
+            if ((LBtrackertable[z])[1] == targetguid) then
+                (LBtrackertable[z])[3] = (eventgettime + 12)
+                (LBtrackertable[z])[4] = 12
+                (LBtrackertable[z])[5] = nil
+                lbtablerefresh = 1
+                break
+            end
+        end
+
+        if (lbtablerefresh == 1) then
+        else
+            table.insert(LBtrackertable, {targetguid, targetname, (eventgettime + 12), 12, nil})
+        end
     end
-    
+
+    for i = 6, 1, -1 do
+        if LBtrackertable[i] and (((LBtrackertable[i])[1] == 2120) or ((LBtrackertable[i])[1] == 88148)) then
+            table.insert(
+                LBtrackertable,
+                {(LBtrackertable[i])[1], (LBtrackertable[i])[2], (LBtrackertable[i])[3], (LBtrackertable[i])[4]}
+            )
+            table.remove(LBtrackertable, i)
+        end
+    end
 end
 
 local function CombuLBtrackerUpdate()
-
     lbtrackerheight = 0
-    
-    for i = 5,1,-1 do 
-    
-      if LBtrackertable[i] and (LBtrackertable[i])[3] and ((LBtrackertable[i])[3] + 2) <= GetTime() 
-        then table.remove(LBtrackertable,i)
-      end
-    
-        if (#LBtrackertable == 0) 
-            then _G["LBtrack"..i]:SetText("")
-                 _G["LBtrack"..i.."Timer"]:SetText("")
-                 _G["LBtrack"..i.."Bar"]:Hide()
-                 _G["LBtrack"..i.."Target"]:SetTexture("")
-                 _G["LBtrack"..i.."Symbol"]:SetTexture("")
-                 LBtrackFrame:Hide()
-        elseif (#LBtrackertable == 1) and (UnitGUID("target") == (LBtrackertable[1])[1]) and (combusettingstable["combulbtarget"] == false)
-            then _G["LBtrack"..i]:SetText("")
-                 _G["LBtrack"..i.."Timer"]:SetText("")
-                 _G["LBtrack"..i.."Bar"]:Hide()
-                 _G["LBtrack"..i.."Target"]:Hide()
-                 _G["LBtrack"..i.."Symbol"]:Hide()
-                 LBtrackFrame:Hide()
-        elseif LBtrackertable[i] and (LBtrackertable[i])[3]
-            then LBtrackFrame:Show()
-                 _G["LBtrack"..i]:SetText((LBtrackertable[i])[2])
-                 combulbtimer = (-1*(GetTime()-(LBtrackertable[i])[3]))
 
-                 if (LBtrackertable[i])[4] and (combulbtimer >= combusettingstable["combutimervalue"]) then -- condition when timer is with more than 2 seconds left
-                     _G["LBtrack"..i.."Timer"]:SetText(format("|cff00ff00%.1f|r",combulbtimer))
-                     _G["LBtrack"..i.."Bar"]:Show()
-                     _G["LBtrack"..i.."Bar"]:SetValue((LBtrackFrame:GetWidth()-12)*(combulbtimer/(LBtrackertable[i])[4]))
-                     _G["LBtrack"..i.."Bar"]:SetStatusBarColor((combusettingstable["barcolornormal"])[1],(combusettingstable["barcolornormal"])[2],(combusettingstable["barcolornormal"])[3],(combusettingstable["barcolornormal"])[4])
-                 elseif (LBtrackertable[i])[4] and (combulbtimer <= combusettingstable["combutimervalue"]) and (combulbtimer >= 0) then -- condition when timer is with less than 2 seconds left
-                     _G["LBtrack"..i.."Timer"]:SetText(format("|cffff0000%.1f|r",combulbtimer))
-                     _G["LBtrack"..i.."Bar"]:Show()
-                     _G["LBtrack"..i.."Bar"]:SetValue((LBtrackFrame:GetWidth()-12)*(combulbtimer/(LBtrackertable[i])[4]))
-                     _G["LBtrack"..i.."Bar"]:SetStatusBarColor(unpack(combusettingstable["barcolorwarning"]))
-                 elseif (combulbtimer <= 0) then
-                     table.remove(LBtrackertable,i)
-                 end
-                 
-                 if LBtrackertable[i] and (LBtrackertable[i])[5] then 
-                   _G["LBtrack"..i.."Symbol"]:SetTexture("Interface\\TARGETINGFRAME\\UI-RaidTargetingIcon_"..(LBtrackertable[i])[5])
-                 else _G["LBtrack"..i.."Symbol"]:SetTexture("")
-                 end
-                 
-                 if LBtrackertable[i] and (UnitGUID("target") == (LBtrackertable[i])[1]) then
-                    _G["LBtrack"..i.."Target"]:SetTexture("Interface\\AddOns\\CombustionHelper\\Images\\Combustion_target")
-                 else _G["LBtrack"..i.."Target"]:SetTexture("")
-                 end
-                 
-                 lbtrackerheight = lbtrackerheight + 9
-                 
-        else 
-             _G["LBtrack"..i]:SetText("")
-             _G["LBtrack"..i.."Timer"]:SetText("")
-             _G["LBtrack"..i.."Bar"]:Hide()
-             _G["LBtrack"..i.."Target"]:SetTexture("")
-             _G["LBtrack"..i.."Symbol"]:SetTexture("")
+    for i = 5, 1, -1 do
+        if LBtrackertable[i] and (LBtrackertable[i])[3] and ((LBtrackertable[i])[3] + 2) <= GetTime() then
+            table.remove(LBtrackertable, i)
+        end
+
+        if (#LBtrackertable == 0) then
+            _G["LBtrack" .. i]:SetText("")
+            _G["LBtrack" .. i .. "Timer"]:SetText("")
+            _G["LBtrack" .. i .. "Bar"]:Hide()
+            _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
+            LBtrackFrame:Hide()
+        elseif
+            (#LBtrackertable == 1) and (UnitGUID("target") == (LBtrackertable[1])[1]) and
+                (combusettingstable["combulbtarget"] == false)
+         then
+            _G["LBtrack" .. i]:SetText("")
+            _G["LBtrack" .. i .. "Timer"]:SetText("")
+            _G["LBtrack" .. i .. "Bar"]:Hide()
+            _G["LBtrack" .. i .. "Target"]:Hide()
+            _G["LBtrack" .. i .. "Symbol"]:Hide()
+            LBtrackFrame:Hide()
+        elseif LBtrackertable[i] and (LBtrackertable[i])[3] then
+            LBtrackFrame:Show()
+            _G["LBtrack" .. i]:SetText((LBtrackertable[i])[2])
+            combulbtimer = (-1 * (GetTime() - (LBtrackertable[i])[3]))
+
+            if (LBtrackertable[i])[4] and (combulbtimer >= combusettingstable["combutimervalue"]) then -- condition when timer is with more than 2 seconds left
+                _G["LBtrack" .. i .. "Timer"]:SetText(format("|cff00ff00%.1f|r", combulbtimer))
+                _G["LBtrack" .. i .. "Bar"]:Show()
+                _G["LBtrack" .. i .. "Bar"]:SetValue(
+                    (LBtrackFrame:GetWidth() - 12) * (combulbtimer / (LBtrackertable[i])[4])
+                )
+                _G["LBtrack" .. i .. "Bar"]:SetStatusBarColor(
+                    (combusettingstable["barcolornormal"])[1],
+                    (combusettingstable["barcolornormal"])[2],
+                    (combusettingstable["barcolornormal"])[3],
+                    (combusettingstable["barcolornormal"])[4]
+                )
+            elseif
+                (LBtrackertable[i])[4] and (combulbtimer <= combusettingstable["combutimervalue"]) and
+                    (combulbtimer >= 0)
+             then -- condition when timer is with less than 2 seconds left
+                _G["LBtrack" .. i .. "Timer"]:SetText(format("|cffff0000%.1f|r", combulbtimer))
+                _G["LBtrack" .. i .. "Bar"]:Show()
+                _G["LBtrack" .. i .. "Bar"]:SetValue(
+                    (LBtrackFrame:GetWidth() - 12) * (combulbtimer / (LBtrackertable[i])[4])
+                )
+                _G["LBtrack" .. i .. "Bar"]:SetStatusBarColor(unpack(combusettingstable["barcolorwarning"]))
+            elseif (combulbtimer <= 0) then
+                table.remove(LBtrackertable, i)
+            end
+
+            if LBtrackertable[i] and (LBtrackertable[i])[5] then
+                _G["LBtrack" .. i .. "Symbol"]:SetTexture(
+                    "Interface\\TARGETINGFRAME\\UI-RaidTargetingIcon_" .. (LBtrackertable[i])[5]
+                )
+            else
+                _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
+            end
+
+            if LBtrackertable[i] and (UnitGUID("target") == (LBtrackertable[i])[1]) then
+                _G["LBtrack" .. i .. "Target"]:SetTexture(
+                    "Interface\\AddOns\\CombustionHelper\\Images\\Combustion_target"
+                )
+            else
+                _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            end
+
+            lbtrackerheight = lbtrackerheight + 9
+        else
+            _G["LBtrack" .. i]:SetText("")
+            _G["LBtrack" .. i .. "Timer"]:SetText("")
+            _G["LBtrack" .. i .. "Bar"]:Hide()
+            _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
         end
     end
-    
+
     LBtrackFrame:SetHeight(lbtrackerheight + 11)
-    
 end
- 
+
 -------------------------------------
 -- Autohide function
 function CombustionAutohide()
+    local combucombat = UnitAffectingCombat("player")
+    local a5, b5, c5 = GetSpellCooldown(comb)
 
-  local combucombat = UnitAffectingCombat("player")
-    local a5,b5,c5 = GetSpellCooldown(comb)
-  
-   if (a5 == nil) then
-  elseif combusettingstable["combuautohide"] == 1 and combufaded == true then -- condition when autohide is disabled
-    combufaded = false
-        table.wipe(LibTransition.tQueue) table.wipe(LibTransition.cQueue) -- stop the Libtransition queue
-    CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
-  elseif combucombat == nil and combufaded == false and ((combusettingstable["combuautohide"] == 2) or (combusettingstable["combuautohide"] == 3)) then -- condition when not in combat and CH is visible
-    combufaded = true
-    CombustionFrame:FadeOut(combusettingstable["combufadeoutspeed"])
-  elseif combusettingstable["combuautohide"] == 2 and combucombat == 1 and combufaded == true then -- condition when in combat
-    combufaded = false
-        table.wipe(LibTransition.tQueue) table.wipe(LibTransition.cQueue)
-    CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
-  elseif combusettingstable["combuautohide"] == 3 and combucombat == 1 and combufaded == true and ((a5 + b5 - GetTime()) <= (combusettingstable["combuafterfade"] + combusettingstable["combufadeinspeed"])) then -- condition when in combat and CB is up
-    combufaded = false
-        table.wipe(LibTransition.tQueue) table.wipe(LibTransition.cQueue)
-    CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
-  elseif combusettingstable["combuautohide"] == 3 and combucombat == 1 and combufaded == false and ((a5 + b5 - GetTime()) >= (combusettingstable["combuafterfade"] + combusettingstable["combufadeinspeed"])) and ((a5 + b5 - GetTime()) <= (b5 - combusettingstable["combubeforefade"])) then -- condition when in combat and CB is in cd
-    combufaded = true
-    CombustionFrame:FadeOut(combusettingstable["combufadeoutspeed"],combusettingstable["combufadealpha"])
-        CombustionFrame:Wait((a5 + b5 - GetTime())-combusettingstable["combufadeinspeed"]-combusettingstable["combuafterfade"])
+    if (a5 == nil) then
+    elseif combusettingstable["combuautohide"] == 1 and combufaded == true then -- condition when autohide is disabled
+        combufaded = false
+        table.wipe(LibTransition.tQueue)
+        table.wipe(LibTransition.cQueue) -- stop the Libtransition queue
         CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
-    StatusTextFrameLabel:SetText(CombuLabel["autohide"])
-        if (combusettingstable["combuchat"]==true) then ChatFrame1:AddMessage(format(CombuLoc["autohidemess"], (a5 + b5 - GetTime())-combusettingstable["combufadeinspeed"]-combusettingstable["combuafterfade"]))
+    elseif
+        combucombat == nil and combufaded == false and
+            ((combusettingstable["combuautohide"] == 2) or (combusettingstable["combuautohide"] == 3))
+     then -- condition when not in combat and CH is visible
+        combufaded = true
+        CombustionFrame:FadeOut(combusettingstable["combufadeoutspeed"])
+    elseif combusettingstable["combuautohide"] == 2 and combucombat == 1 and combufaded == true then -- condition when in combat
+        combufaded = false
+        table.wipe(LibTransition.tQueue)
+        table.wipe(LibTransition.cQueue)
+        CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
+    elseif
+        combusettingstable["combuautohide"] == 3 and combucombat == 1 and combufaded == true and
+            ((a5 + b5 - GetTime()) <= (combusettingstable["combuafterfade"] + combusettingstable["combufadeinspeed"]))
+     then -- condition when in combat and CB is up
+        combufaded = false
+        table.wipe(LibTransition.tQueue)
+        table.wipe(LibTransition.cQueue)
+        CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
+    elseif
+        combusettingstable["combuautohide"] == 3 and combucombat == 1 and combufaded == false and
+            ((a5 + b5 - GetTime()) >= (combusettingstable["combuafterfade"] + combusettingstable["combufadeinspeed"])) and
+            ((a5 + b5 - GetTime()) <= (b5 - combusettingstable["combubeforefade"]))
+     then -- condition when in combat and CB is in cd
+        combufaded = true
+        CombustionFrame:FadeOut(combusettingstable["combufadeoutspeed"], combusettingstable["combufadealpha"])
+        CombustionFrame:Wait(
+            (a5 + b5 - GetTime()) - combusettingstable["combufadeinspeed"] - combusettingstable["combuafterfade"]
+        )
+        CombustionFrame:FadeIn(combusettingstable["combufadeinspeed"])
+        StatusTextFrameLabel:SetText(CombuLabel["autohide"])
+        if (combusettingstable["combuchat"] == true) then
+            ChatFrame1:AddMessage(
+                format(
+                    CombuLoc["autohidemess"],
+                    (a5 + b5 - GetTime()) - combusettingstable["combufadeinspeed"] -
+                        combusettingstable["combuafterfade"]
+                )
+            )
         end
     end
-    
 end
 
 -----------------------------------
