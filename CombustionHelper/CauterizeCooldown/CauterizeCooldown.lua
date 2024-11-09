@@ -34,7 +34,11 @@ end
 function CombuCautOptions_OnLoad(panel)
 	panel.name = "Cauterize options"
 	panel.parent = "CombustionHelper"
-	InterfaceOptions_AddCategory(panel);
+  -- InterfaceOptions_AddCategory(panel)
+  category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name);
+  category.ID = panel.name
+  Settings.RegisterAddOnCategory(category);
+  
 end
 
 -------------------------------
@@ -316,17 +320,3 @@ function CombuCaut_OnUpdate(self, elapsed)
 
         end
 end
-
-
---~ SLASH_CombuCautCONFIG1 = "/cauterize"
-
---~ SlashCmdList["CombuCautCONFIG"] = function(msg)
-
---~ 	if msg == "" or  msg == "help" or  msg == "?" or msg == "config" then
---~ 		 InterfaceOptionsFrame_OpenToCategory("Cauterize Options")
---~ 	else
---~ 		 InterfaceOptionsFrame_OpenToCategory("Cauterize Options")
---~ 	end
-
---~ end
-

@@ -1722,38 +1722,8 @@ UIDropDownMenu_SetText(CombuLanguageDropDown, combusettingstable["language"])
                     </OnShow>
                 </Scripts>
             </Frame>
-            
-			<CheckButton name="CombuBarButton" inherits="CombuCheckButtontemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="CombuLanguageInfo" relativePoint="BOTTOMLEFT">
-						<Offset>
-							<AbsDimension x="0" y="-30"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnShow>
-						_G[self:GetName().."Text"]:SetText(CombuOptLoc[self:GetName()])
-						if (combusettingstable["combubartimers"] == true) then self:SetChecked(true)
-														 CombuBarSlider:Enable()
-							 							 CombuBarSlider:SetAlpha(1)
-						else self:SetChecked(false)
-							 CombuBarSlider:Disable()
-							 CombuBarSlider:SetAlpha(0.5)
-						end
-					</OnShow>
-					<OnClick>
-						Combustionbar()
-						if (combusettingstable["combubartimers"] == true) then CombuBarSlider:Enable()
-                                                                                CombuBarSlider:SetAlpha(1)
-						else CombuBarSlider:Disable()
-							 CombuBarSlider:SetAlpha(0.5)
-						end
-					</OnClick>				
-				</Scripts>
-			</CheckButton>
-			
-		<Slider name="CombuBarSlider" inherits="CombuSliderTemplate">
+      
+      <Slider name="CombuBarSlider" inherits="CombuSliderTemplate">
 				<Size>
 					<AbsDimension x="190" y="16"/>
 				</Size>
@@ -1786,6 +1756,38 @@ UIDropDownMenu_SetText(CombuLanguageDropDown, combusettingstable["language"])
 					</OnValueChanged>
 				</Scripts>
 			</Slider>
+
+			<CheckButton name="CombuBarButton" inherits="CombuCheckButtontemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="CombuLanguageInfo" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-30"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnShow>
+						_G[self:GetName().."Text"]:SetText(CombuOptLoc[self:GetName()])
+						if (combusettingstable["combubartimers"] == true) then self:SetChecked(true)
+														 CombuBarSlider:Enable()
+							 							 CombuBarSlider:SetAlpha(1)
+						else self:SetChecked(false)
+							 CombuBarSlider:Disable()
+							 CombuBarSlider:SetAlpha(0.5)
+						end
+					</OnShow>
+					<OnClick>
+						Combustionbar()
+						if (combusettingstable["combubartimers"] == true) then CombuBarSlider:Enable()
+                                                                                CombuBarSlider:SetAlpha(1)
+						else CombuBarSlider:Disable()
+							 CombuBarSlider:SetAlpha(0.5)
+						end
+					</OnClick>				
+				</Scripts>
+			</CheckButton>
+			
+
 									
 	   <Frame name="CombuSliderInfo">
         <Size>
@@ -1823,6 +1825,64 @@ UIDropDownMenu_SetText(CombuLanguageDropDown, combusettingstable["language"])
 				_G[self:GetName().."Text"]:SetText(CombuOptLoc[self:GetName()])
 			</OnShow>
 		</Scripts>
+      </Frame>
+
+      <Frame name="CombufadedtimeText" inherits="CombuFrametemplate">
+        <Size>
+          <AbsDimension x="70" y="30" />
+        </Size>
+        <Anchors>
+		  <Anchor point="TOPLEFT" relativeTo="CombufadeoutspeedSlider" relativePoint="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="15" y="0" />
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer>
+            <FontString name="$parentText" font="Fonts\FRIZQT__.TTF" text="" justifyH="CENTER">
+		        <Anchors>
+				  <Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
+		            <Offset>
+		              <AbsDimension x="0" y="0" />
+		            </Offset>
+		          </Anchor>
+		        </Anchors>
+              <FontHeight>
+                <AbsValue val="11" />
+              </FontHeight>
+              <Color r="1" g="1" b="1" />
+              <Shadow>
+                <Color r="0" g="0" b="0" />
+                <Offset>
+                  <AbsDimension x="1" y="-1" />
+                </Offset>
+              </Shadow>
+            </FontString>
+            <FontString name="CombufadedtimeFrameText" font="Fonts\FRIZQT__.TTF" text="" justifyH="CENTER">
+		        <Size>
+		          <AbsDimension x="70" y="9" />
+		        </Size>
+		        <Anchors>
+				  <Anchor point="TOP" relativeTo="$parentText" relativePoint="BOTTOM">
+		            <Offset>
+		              <AbsDimension x="0" y="-5" />
+		            </Offset>
+		          </Anchor>
+		        </Anchors>
+              <FontHeight>
+                <AbsValue val="11" />
+              </FontHeight>
+              <Color r="1" g="1" b="1" />
+              <Shadow>
+                <Color r="0" g="0" b="0" />
+                <Offset>
+                  <AbsDimension x="1" y="-1" />
+                </Offset>
+              </Shadow>
+            </FontString>
+            </Layer>
+        </Layers>
       </Frame>
       
 			<Slider name="CombubeforefadeSlider" inherits="CombuSliderTemplate">
@@ -1892,63 +1952,6 @@ UIDropDownMenu_SetText(CombuLanguageDropDown, combusettingstable["language"])
 					</OnValueChanged>
 				</Scripts>
 			</Slider>
-      <Frame name="CombufadedtimeText" inherits="CombuFrametemplate">
-        <Size>
-          <AbsDimension x="70" y="30" />
-        </Size>
-        <Anchors>
-		  <Anchor point="TOPLEFT" relativeTo="CombufadeoutspeedSlider" relativePoint="TOPRIGHT">
-            <Offset>
-              <AbsDimension x="15" y="0" />
-            </Offset>
-          </Anchor>
-        </Anchors>
-        <Layers>
-          <Layer>
-            <FontString name="$parentText" font="Fonts\FRIZQT__.TTF" text="" justifyH="CENTER">
-		        <Anchors>
-				  <Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
-		            <Offset>
-		              <AbsDimension x="0" y="0" />
-		            </Offset>
-		          </Anchor>
-		        </Anchors>
-              <FontHeight>
-                <AbsValue val="11" />
-              </FontHeight>
-              <Color r="1" g="1" b="1" />
-              <Shadow>
-                <Color r="0" g="0" b="0" />
-                <Offset>
-                  <AbsDimension x="1" y="-1" />
-                </Offset>
-              </Shadow>
-            </FontString>
-            <FontString name="CombufadedtimeFrameText" font="Fonts\FRIZQT__.TTF" text="" justifyH="CENTER">
-		        <Size>
-		          <AbsDimension x="70" y="9" />
-		        </Size>
-		        <Anchors>
-				  <Anchor point="TOP" relativeTo="$parentText" relativePoint="BOTTOM">
-		            <Offset>
-		              <AbsDimension x="0" y="-5" />
-		            </Offset>
-		          </Anchor>
-		        </Anchors>
-              <FontHeight>
-                <AbsValue val="11" />
-              </FontHeight>
-              <Color r="1" g="1" b="1" />
-              <Shadow>
-                <Color r="0" g="0" b="0" />
-                <Offset>
-                  <AbsDimension x="1" y="-1" />
-                </Offset>
-              </Shadow>
-            </FontString>
-            </Layer>
-        </Layers>
-      </Frame>
       
 			<Slider name="CombufadeinspeedSlider" inherits="CombuSliderTemplate">
 				<Size>
@@ -2031,7 +2034,8 @@ UIDropDownMenu_SetText(CombuLanguageDropDown, combusettingstable["language"])
 				</Anchors>
 				<Scripts>
 					<OnShow>
-						_G[self:GetName().."Text"]:SetText(CombuOptLoc[self:GetName()])
+          <!-- todo -->
+						<!-- _G[self:GetName().."Text"]:SetText(CombuOptLoc[self:GetName()]) -->
 						self:HookScript("OnEnter", function(self) 
 														CombuOptionsTooltipFrame:Show() 
 														CombuOptionsTooltipTitle:SetText(_G[self:GetName().."Text"]:GetText()) 

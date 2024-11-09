@@ -1,137 +1,103 @@
+---@diagnostic disable: undefined-global
 CombustionHelper = {}
 
 LibTransition = LibStub("LibTransition-1.0")
 CombuLSM = LibStub("LibSharedMedia-3.0")
 
-Combustion_UpdateInterval = 0.1 -- How often the OnUpdate code will run (in seconds)
+Combustion_UpdateInterval = 1 -- How often the OnUpdate code will run (in seconds)
 
 local lvb,
-    ffb,
-    ignite,
-    pyro1,
-    pyro2,
-    comb,
-    impact,
-    CritMass,
-    ShadowMast,
-    combulbtimer,
-    combuffbtimer,
-    combupyrotimer,
-    combucrittimer,
-    combupyrocast,
-    combuclientVersion,
-    combucritpredict,
-    combucrittarget
+  ffb,
+  ignite,
+  pyro1,
+  pyro2,
+  comb,
+  impact,
+  CritMass,
+  ShadowMast,
+  combulbtimer,
+  combuffbtimer,
+  combupyrotimer,
+  combucrittimer,
+  combupyrocast,
+  combuclientVersion,
+  combucritpredict,
+  combucrittarget
 local LBTime,
-    FFBTime,
-    IgnTime,
-    PyroTime,
-    CombustionUp,
-    ffbglyph,
-    combufadeout,
-    ImpactUp,
-    ffbheight,
-    critheight,
-    combucritwidth,
-    lbraidcheck,
-    lbtablerefresh,
-    combuimpacttimer
+  FFBTime,
+  IgnTime,
+  PyroTime,
+  CombustionUp,
+  ffbglyph,
+  combufadeout,
+  ImpactUp,
+  ffbheight,
+  critheight,
+  combucritwidth,
+  lbraidcheck,
+  lbtablerefresh,
+  combuimpacttimer
 local combulbrefresh,
-    lbraidcheck,
-    lbtablerefresh,
-    lbgroupsuffix,
-    lbtargetsuffix,
-    lbgroupnumber,
-    lbtrackerheight,
-    combupyrogain,
-    combupyrorefresh,
-    combucolorinstance
+  lbraidcheck,
+  lbtablerefresh,
+  lbgroupsuffix,
+  lbtargetsuffix,
+  lbgroupnumber,
+  lbtrackerheight,
+  combupyrogain,
+  combupyrorefresh,
+  combucolorinstance
 local combuignitebank,
-    combuigniteapplied,
-    combuignitevalue,
-    combuignitetemp,
-    combuignitemunched,
-    combuigndamage,
-    combuignitecount
+  combuigniteapplied,
+  combuignitevalue,
+  combuignitetemp,
+  combuignitemunched,
+  combuigndamage,
+  combuignitecount
 local timestamp,
-    event,
-    hideCaster,
-    sourceGUID,
-    sourceName,
-    sourceFlags,
-    sourceRaidFlags,
-    destGUID,
-    destName,
-    destFlags,
-    destRaidFlags,
-    spellId,
-    spellName,
-    spellSchool,
-    amount,
-    overkill,
-    school,
-    resisted,
-    blocked,
-    absorbed,
-    critical,
-    combucombustiontimestamp,
-    combucombustiondmg,
-    combucombustionprevdmg,
-    combuticks,
-    combuprevticks,
-    combutickdmg,
-    combutickprevdmg,
-    combuprevtargets,
-    combutargets
+  event,
+  hideCaster,
+  sourceGUID,
+  sourceName,
+  sourceFlags,
+  sourceRaidFlags,
+  destGUID,
+  destName,
+  destFlags,
+  destRaidFlags,
+  spellId,
+  spellName,
+  spellSchool,
+  amount,
+  overkill,
+  school,
+  resisted,
+  blocked,
+  absorbed,
+  critical,
+  combucombustiontimestamp,
+  combucombustiondmg,
+  combucombustionprevdmg,
+  combuticks,
+  combuprevticks,
+  combutickdmg,
+  combutickprevdmg,
+  combuprevtargets,
+  combutargets
 local combufirepower,
-    combucriticalmass,
-    combupyrodps,
-    combulbdps,
-    combuhastetick,
-    combucurrenthaste,
-    combucurrentcrit,
-    combuexpecteddmg,
-    combuexpectedtickdmg
-local combubasewidth, combunumhasteprocs, combucurrenthasteproc, combucurrenthasteproctimer, combuflathastevalue
-function Combustion_OnLoad(Frame)
-    if select(2, UnitClass("player")) ~= "MAGE" then
-        CombustionFrame:Hide()
-        return
-    end
-
-    Frame:RegisterForDrag("LeftButton")
-    Frame:RegisterEvent("PLAYER_LOGIN")
-    Frame:RegisterEvent("PLAYER_TALENT_UPDATE")
-    Frame:RegisterEvent("GLYPH_ADDED")
-    Frame:RegisterEvent("GLYPH_REMOVED")
-    Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
-    Frame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    Frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    CombuLSM.RegisterCallback(CombustionHelper, "LibSharedMedia_Registered", "SharedMedia_Registered")
-
-    CombuLSM:Register("background", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Background")
-    CombuLSM:Register("border", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Border")
-    CombuLSM:Register("border", "ElvUI Border", "Interface\\AddOns\\CombustionHelper\\Images\\ElvUIBorder")
-    CombuLSM:Register("statusbar", "CombuBar", "Interface\\AddOns\\CombustionHelper\\Images\\combubarblack")
-    CombuLSM:Register("sound", "CH Volcano", "Interface\\AddOns\\CombustionHelper\\Sound\\Volcano.ogg")
-
-    lvb = GetSpellInfo(44457)
-    ffb = GetSpellInfo(44614)
-    ignite = GetSpellInfo(12654)
-    pyro1 = GetSpellInfo(11366)
-    pyro2 = GetSpellInfo(92315)
-    comb = GetSpellInfo(11129)
-    impact = GetSpellInfo(64343)
-    CritMass = GetSpellInfo(22959)
-    ShadowMast = GetSpellInfo(17800)
-    combudot = GetSpellInfo(83853)
-
-    LibTransition:Attach(Frame)
-
-    CombuLanguageCheck()
-    CombuTableCopy()
-    CombustionVarReset()
-end
+  combucriticalmass,
+  combupyrodps,
+  combulbdps,
+  combuhastetick,
+  combucurrenthaste,
+  combucurrentcrit,
+  combuexpecteddmg,
+  combuexpectedtickdmg
+local combubasewidth,
+  combunumhasteprocs,
+  combucurrenthasteproc,
+  combucurrenthasteproctimer,
+  combuflathastevalue
 
 local LBtrackertable = {}
 
@@ -162,9 +128,9 @@ local combuLBplateau = {
 local combuhasteprocs = {
     [109844] = {78477, "haste", "flat", 2175, 60, 10}, -- problem with staff wielder buff and people buff
     [107804] = {77190, "haste", "flat", 1928, 60, 10},
-     -- problem with staff wielder buff and people buff
+      -- problem with staff wielder buff and people buff
     [109842] = {78486, "haste", "flat", 1707, 60, 10},
-     -- problem with staff wielder buff and people buff
+      -- problem with staff wielder buff and people buff
     [109789] = {77991, "haste", "flat", 3278, 100, 20},
     [107982] = {77203, "haste", "flat", 2904, 100, 20},
     [109787] = {77971, "haste", "flat", 2573, 100, 20},
@@ -240,6 +206,93 @@ combudefaultsettingstable = {
     ["combuticktexturename"] = "CombuBar",
     ["combutickpredict"] = true
 }
+
+local combuwidgetlist = {
+  bars = {
+      "LBtrack1Bar",
+      "LBtrack2Bar",
+      "LBtrack3Bar",
+      "LBtrack4Bar",
+      "LBtrack5Bar",
+      "FFBbar",
+      "Pyrobar",
+      "Ignbar",
+      "LBbar",
+      "Combubar",
+      "Critbar"
+  },
+  text = {
+      "LBtrack1",
+      "LBtrack1Timer",
+      "LBtrack2",
+      "LBtrack2Timer",
+      "LBtrack3",
+      "LBtrack3Timer",
+      "LBtrack4",
+      "LBtrack4Timer",
+      "LBtrack5",
+      "LBtrack5Timer",
+      "LBLabel",
+      "IgniteLabel",
+      "PyroLabel",
+      "FFBLabel",
+      "LBTextFrameLabel",
+      "IgnTextFrameLabel",
+      "PyroTextFrameLabel",
+      "FFBTextFrameLabel",
+      "StatusTextFrameLabel",
+      "CritTypeFrameLabel",
+      "CritTextFrameLabel"
+  }
+}
+
+local CombuCritMeta = {
+  34220, -- burning crusade
+  41285, -- wrath of the lich king
+  52291, -- cataclysm
+  68780
+}
+
+function Combustion_OnLoad(Frame)
+    if select(2, UnitClass("player")) ~= "MAGE" then
+        CombustionFrame:Hide()
+        return
+    end
+
+    Frame:RegisterForDrag("LeftButton")
+    Frame:RegisterEvent("PLAYER_LOGIN")
+    Frame:RegisterEvent("PLAYER_TALENT_UPDATE")
+    Frame:RegisterEvent("GLYPH_ADDED")
+    Frame:RegisterEvent("GLYPH_REMOVED")
+    Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    Frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    Frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    CombuLSM.RegisterCallback(CombustionHelper, "LibSharedMedia_Registered", "SharedMedia_Registered")
+
+    CombuLSM:Register("background", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Background")
+    CombuLSM:Register("border", "Blizzard Tooltip", "Interface\\Tooltips\\UI-Tooltip-Border")
+    CombuLSM:Register("border", "ElvUI Border", "Interface\\AddOns\\CombustionHelper\\Images\\ElvUIBorder")
+    CombuLSM:Register("statusbar", "CombuBar", "Interface\\AddOns\\CombustionHelper\\Images\\combubarblack")
+    CombuLSM:Register("sound", "CH Volcano", "Interface\\AddOns\\CombustionHelper\\Sound\\Volcano.ogg")
+
+    lvb = GetSpellInfo(44457)
+    ffb = GetSpellInfo(44614)
+    ignite = GetSpellInfo(12654)
+    pyro1 = GetSpellInfo(11366)
+    pyro2 = GetSpellInfo(92315)
+    comb = GetSpellInfo(11129)
+    impact = GetSpellInfo(64343)
+    CritMass = GetSpellInfo(22959)
+    ShadowMast = GetSpellInfo(17800)
+    combudot = GetSpellInfo(83853)
+
+    LibTransition:Attach(Frame)
+
+    CombuLanguageCheck()
+    CombuTableCopy()
+    CombustionVarReset()
+end
+
 function CombuLanguageCheck()
     if combusettingstable then
         if
@@ -352,7 +405,10 @@ end
 function CombustionHelperOptions_OnLoad(panel)
     CombuLanguageCheck()
     panel.name = "CombustionHelper"
-    InterfaceOptions_AddCategory(panel)
+    -- InterfaceOptions_AddCategory(panel)
+    category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name);
+    category.ID = panel.name
+    Settings.RegisterAddOnCategory(category);
 end
 
 -------------------------------
@@ -361,7 +417,10 @@ function CombustionHelperCustomOptions_OnLoad(panel)
     CombuLanguageCheck()
     panel.name = CombuLoc["interfaceGraph"]
     panel.parent = "CombustionHelper"
-    InterfaceOptions_AddCategory(panel)
+    -- InterfaceOptions_AddCategory(panel)
+    category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name);
+    category.ID = panel.name
+    Settings.RegisterAddOnCategory(category);
 end
 
 -------------------------------
@@ -370,7 +429,10 @@ function CombustionHelperTickOptions_OnLoad(panel)
     CombuLanguageCheck()
     panel.name = "tick bar" --CombuLoc["interfaceGraph"]
     panel.parent = "CombustionHelper"
-    InterfaceOptions_AddCategory(panel)
+    -- InterfaceOptions_AddCategory(panel)
+    category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name);
+    category.ID = panel.name
+    Settings.RegisterAddOnCategory(category);
 end
 
 -------------------------------
@@ -682,45 +744,6 @@ function CombustionLBtracker()
     CombustionFrameresize()
 end
 
-local combuwidgetlist = {
-    bars = {
-        "LBtrack1Bar",
-        "LBtrack2Bar",
-        "LBtrack3Bar",
-        "LBtrack4Bar",
-        "LBtrack5Bar",
-        "FFBbar",
-        "Pyrobar",
-        "Ignbar",
-        "LBbar",
-        "Combubar",
-        "Critbar"
-    },
-    text = {
-        "LBtrack1",
-        "LBtrack1Timer",
-        "LBtrack2",
-        "LBtrack2Timer",
-        "LBtrack3",
-        "LBtrack3Timer",
-        "LBtrack4",
-        "LBtrack4Timer",
-        "LBtrack5",
-        "LBtrack5Timer",
-        "LBLabel",
-        "IgniteLabel",
-        "PyroLabel",
-        "FFBLabel",
-        "LBTextFrameLabel",
-        "IgnTextFrameLabel",
-        "PyroTextFrameLabel",
-        "FFBTextFrameLabel",
-        "StatusTextFrameLabel",
-        "CritTypeFrameLabel",
-        "CritTextFrameLabel"
-    }
-}
-
 function CombuBackdropBuild()
     if not CombuBackdrop then
         CombuBackdrop = {
@@ -739,15 +762,15 @@ function CombuBackdropBuild()
     end
 
     if combusettingstable then
-        CombuBackdrop["bgFile"] = CombuLSM:Fetch("background", combusettingstable["bgFile"])
-        CombuBackdrop["tileSize"] = combusettingstable["tileSize"]
-        CombuBackdrop["edgeFile"] = CombuLSM:Fetch("border", combusettingstable["edgeFile"])
-        CombuBackdrop["tile"] = combusettingstable["tile"]
-        CombuBackdrop["edgeSize"] = combusettingstable["edgeSize"]
-        (CombuBackdrop["insets"])["top"] = combusettingstable["insets"]
-        (CombuBackdrop["insets"])["right"] = combusettingstable["insets"]
-        (CombuBackdrop["insets"])["left"] = combusettingstable["insets"]
-        (CombuBackdrop["insets"])["bottom"] = combusettingstable["insets"]
+        CombuBackdrop["bgFile"] = CombuLSM:Fetch("background", combusettingstable["bgFile"]);
+        CombuBackdrop["tileSize"] = combusettingstable["tileSize"];
+        CombuBackdrop["edgeFile"] = CombuLSM:Fetch("border", combusettingstable["edgeFile"]);
+        CombuBackdrop["tile"] = combusettingstable["tile"];
+        CombuBackdrop["edgeSize"] = combusettingstable["edgeSize"];
+        CombuBackdrop["insets"]["top"] = combusettingstable["insets"];
+        CombuBackdrop["insets"]["right"] = combusettingstable["insets"];
+        CombuBackdrop["insets"]["left"] = combusettingstable["insets"];
+        CombuBackdrop["insets"]["bottom"] = combusettingstable["insets"];
     end
 
     CombustionFrame:SetBackdrop(CombuBackdrop)
@@ -1096,13 +1119,6 @@ local function Combuffbglyphcheck()
     end
 end
 
-local CombuCritMeta = {
-    34220, -- burning crusade
-    41285, -- wrath of the lich king
-    52291, -- cataclysm
-    68780
-}
-
 function CombuCreateTextureList(dropdown, settings)
     combutexturesettings = settings
     combutexturedropdown = dropdown
@@ -1315,12 +1331,12 @@ local function CombuLBauratracker(targetguid, targetname, eventgettime)
     end
 
     if combuimpacttimer and ((combuimpacttimer + 1) >= GetTime()) then
-        local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 = UnitAura("target", lvb, nil, "PLAYER HARMFUL")
+        local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 = C_UnitAuras.GetAuraDataBySpellName("target", lvb, "PLAYER HARMFUL")
         for z = 1, #LBtrackertable do
             if ((LBtrackertable[z])[1] == targetguid) then
-                (LBtrackertable[z])[3] = g12
-                (LBtrackertable[z])[4] = f12
-                (LBtrackertable[z])[5] = nil
+                LBtrackertable[z][3] = g12
+                LBtrackertable[z][4] = f12
+                LBtrackertable[z][5] = nil
                 lbtablerefresh = 1
                 break
             end
@@ -1334,12 +1350,12 @@ local function CombuLBauratracker(targetguid, targetname, eventgettime)
         lbraidcheck = 1
     elseif lbtargetsuffix and (UnitGUID(lbtargetsuffix) == targetguid) then
         local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 =
-            UnitAura(lbtargetsuffix, lvb, nil, "PLAYER HARMFUL")
+            C_UnitAuras.GetAuraDataBySpellName(lbtargetsuffix, lvb, "PLAYER HARMFUL")
         for z = 1, #LBtrackertable do
             if ((LBtrackertable[z])[1] == targetguid) then
-                (LBtrackertable[z])[3] = g12
-                (LBtrackertable[z])[4] = f12
-                (LBtrackertable[z])[5] = GetRaidTargetIndex(lbtargetsuffix)
+                LBtrackertable[z][3] = g12
+                LBtrackertable[z][4] = f12
+                LBtrackertable[z][5] = GetRaidTargetIndex(lbtargetsuffix)
                 lbtablerefresh = 1
                 break
             end
@@ -1355,13 +1371,13 @@ local function CombuLBauratracker(targetguid, targetname, eventgettime)
         for i = 1, lbgroupnumber do -- first we check if a raid or party members target the LB's target to have an accurate expiration time with UnitAura
             if (UnitGUID(lbgroupsuffix .. i .. "-target") == targetguid) then
                 local a12, b12, c12, d12, e12, f12, g12, h12, i12, j12, k12 =
-                    UnitAura(lbgroupsuffix .. i .. "-target", lvb, nil, "PLAYER HARMFUL")
+                    C_UnitAuras.GetAuraDataBySpellName(lbgroupsuffix .. i .. "-target", lvb, "PLAYER HARMFUL")
 
                 for z = 1, #LBtrackertable do
                     if ((LBtrackertable[z])[1] == targetguid) then
-                        (LBtrackertable[z])[3] = g12
-                        (LBtrackertable[z])[4] = f12
-                        (LBtrackertable[z])[5] = GetRaidTargetIndex(lbgroupsuffix .. i .. "-target")
+                        LBtrackertable[z][3] = g12
+                        LBtrackertable[z][4] = f12
+                        LBtrackertable[z][5] = GetRaidTargetIndex(lbgroupsuffix .. i .. "-target")
                         lbtablerefresh = 1
                         break
                     end
@@ -1383,9 +1399,9 @@ local function CombuLBauratracker(targetguid, targetname, eventgettime)
     if (lbraidcheck == 0) then -- info with UnitAura have been collected, skipping this part.
         for z = 1, #LBtrackertable do -- no raid members targetting the LB's target so using GetTime from event fired and 12 secs as duration
             if ((LBtrackertable[z])[1] == targetguid) then
-                (LBtrackertable[z])[3] = (eventgettime + 12)
-                (LBtrackertable[z])[4] = 12
-                (LBtrackertable[z])[5] = nil
+                LBtrackertable[z][3] = (eventgettime + 12)
+                LBtrackertable[z][4] = 12
+                LBtrackertable[z][5] = nil
                 lbtablerefresh = 1
                 break
             end
@@ -1420,7 +1436,11 @@ local function CombuLBtrackerUpdate()
             _G["LBtrack" .. i]:SetText("")
             _G["LBtrack" .. i .. "Timer"]:SetText("")
             _G["LBtrack" .. i .. "Bar"]:Hide()
-            _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            -- _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            _G["LBtrack" .. i .. "Target"]:SetTexture(
+              "Interface\\AddOns\\CombustionHelper\\Images\\Combustion_target"
+            )
+            print('Target texture 1')
             _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
             LBtrackFrame:Hide()
         elseif
@@ -1476,8 +1496,10 @@ local function CombuLBtrackerUpdate()
                 _G["LBtrack" .. i .. "Target"]:SetTexture(
                     "Interface\\AddOns\\CombustionHelper\\Images\\Combustion_target"
                 )
+                print('Target texture 2')
             else
                 _G["LBtrack" .. i .. "Target"]:SetTexture("")
+                print('Target texture 3')
             end
 
             lbtrackerheight = lbtrackerheight + 9
@@ -1486,6 +1508,7 @@ local function CombuLBtrackerUpdate()
             _G["LBtrack" .. i .. "Timer"]:SetText("")
             _G["LBtrack" .. i .. "Bar"]:Hide()
             _G["LBtrack" .. i .. "Target"]:SetTexture("")
+            print('Target texture 4')
             _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
         end
     end
@@ -1551,7 +1574,8 @@ end
 -----------------------------------
 -- Ignite managing function
 local function CombustionIgnite(event, spellId, spellSchool, amount, critical, destGUID)
-  local a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2 = UnitAura("target", ignite, nil, "PLAYER HARMFUL")
+  local a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2 = C_UnitAuras.GetAuraDataBySpellName("target", ignite, "PLAYER HARMFUL")
+  
 
   if (k2 == 12654) then
     combuignitetimer = (-1 * (GetTime() - g2))
@@ -1677,15 +1701,15 @@ end -- end CombustionIgnite
 
 local function CombuDamagePredicter()
   if (
-    select(1,UnitAura("target",pyro1,nil,"HARMFUL")) or
-    select(1,UnitAura("target",pyro2,nil,"HARMFUL"))
+    select(1,C_UnitAuras.GetAuraDataBySpellName("target", pyro1, "HARMFUL")) or
+    select(1,C_UnitAuras.GetAuraDataBySpellName("target", pyro2, "HARMFUL"))
   ) then
     combupyrodps = (164 + (0.180*GetSpellBonusDamage(3)))*(combufirepower)*(1.25)*((0.00015618*GetCombatRating(26)) + 1.224)
   else
     combupyrodps = 0
   end
-  
-  if select(1,UnitAura("target","Living Bomb",nil,"HARMFUL")) then
+
+  if select(1,C_UnitAuras.GetAuraDataBySpellName("target", "Living Bomb", "HARMFUL")) then
     combulbdps = (234 + (0.258*GetSpellBonusDamage(3)))*(combufirepower)*(1.25)*(combucriticalmass)*((0.00015618*GetCombatRating(26)) + 1.224)
   else
     combulbdps = 0
@@ -1931,9 +1955,9 @@ function Combustion_OnEvent(self, event, ...)
           lbtablerefresh = 0
           for z = 1, #LBtrackertable do
             if ((LBtrackertable[z])[1] == spellId) then
-              (LBtrackertable[z])[3] = (GetTime() + 8)
-              (LBtrackertable[z])[4] = 8
-              (LBtrackertable[z])[5] = nil
+              LBtrackertable[z][3] = GetTime() + 8
+              LBtrackertable[z][4] = 8
+              LBtrackertable[z][5] = nil
               lbtablerefresh = 1
               break
             end
@@ -2075,25 +2099,25 @@ function Combustion_OnUpdate(self, elapsed)
   self.TimeSinceLastUpdate = (self.TimeSinceLastUpdate or 0) + elapsed;
  
   if (self.TimeSinceLastUpdate > Combustion_UpdateInterval) then
-    local time = GetTime()   
-            
+    local time = GetTime()
+
     -------------------------------
     --Living Bomb part
-    local a,b,c,d,e,f,g,h,i,j,k = UnitAura("target", lvb, nil, "PLAYER HARMFUL")		
-    
+    local a,b,c,d,e,f,g,h,i,j,k = C_UnitAuras.GetAuraDataBySpellName("target", lvb, "PLAYER HARMFUL")
+
     if (k==44457) then 
       combulbtimer = (-1*(time-g))
     else
       combulbtimer = 0
       combulbdamage = 0
     end
-    
+
     -- condition when timer is with more than 2 seconds left
     if (combulbtimer >= combusettingstable["combutimervalue"]) and (combulbtimer ~= 0) then
       LBTextFrameLabel:SetText(format("|cff00ff00%.1f|r",combulbtimer))
       LBButton:SetTexture("Interface\\AddOns\\CombustionHelper\\Images\\Combustionon")
       LBTime = 1
-    
+
     -- condition when timer is with less than 2 seconds left
     elseif (combulbtimer <= combusettingstable["combutimervalue"]) and (combulbtimer ~= 0) then
       LBTextFrameLabel:SetText(format("|cffff0000%.1f|r",combulbtimer))
@@ -2105,7 +2129,7 @@ function Combustion_OnUpdate(self, elapsed)
       LBLabel:SetText(CombuLabel["lb"])
       LBTime = 0
     end
-      
+
     if (combusettingstable["combubartimers"] == true) and (k==44457) and (combulbtimer <= combusettingstable["combutimervalue"]) then
       LBbar:Show()
       LBbar:SetValue((28+combusettingstable["combubarwidth"])*((g-GetTime())/f))
@@ -2117,11 +2141,11 @@ function Combustion_OnUpdate(self, elapsed)
     else
       LBbar:Hide()
     end
-      
+
     --------------------------------
     --FrostfireBolt part
-    local a1,b1,c1,d1,e1,f1,g1,h1,i1,j1,k1 = UnitAura("target", ffb, nil, "PLAYER HARMFUL")		
-    
+    local a1,b1,c1,d1,e1,f1,g1,h1,i1,j1,k1 = C_UnitAuras.GetAuraDataBySpellName("target", ffb, "PLAYER HARMFUL")
+
     if (k1==44614) then 
       combuffbtimer = (-1*(time-g1))
     else
@@ -2129,16 +2153,16 @@ function Combustion_OnUpdate(self, elapsed)
       combuffbdamage = 0
     end
 
-    if (ffbglyph == false) or (combusettingstable["combuffb"] == false) then 
+    if (ffbglyph == false) or (combusettingstable["combuffb"] == false) then
       FFBTime = 1
       FFBTextFrameLabel:SetText(format(CombuLabel["ffbglyph"]))
-    
+
     -- condition when timer is with more than 2 seconds left
     elseif (combuffbtimer >= combusettingstable["combutimervalue"]) and (combuffbtimer ~= 0) then
       FFBTextFrameLabel:SetText(format("|cff00ff00%.1f/%d|r",combuffbtimer,(d1)))
       FFBButton:SetTexture("Interface\\AddOns\\CombustionHelper\\Images\\Combustionon")
       FFBTime = 1
-    
+
     -- condition when timer is with less than 2 seconds left
     elseif (combuffbtimer <= combusettingstable["combutimervalue"]) and (combuffbtimer ~= 0) then
       FFBTextFrameLabel:SetText(format("|cffff0000%.1f/%d|r",combuffbtimer,(d1)))
@@ -2150,7 +2174,7 @@ function Combustion_OnUpdate(self, elapsed)
       FFBLabel:SetText(CombuLabel["frostfire"])
       FFBTime = 0
     end
-      
+
     if (combusettingstable["combubartimers"] == true) and (k1==44614) and (combuffbtimer <= combusettingstable["combutimervalue"]) then 
       FFBbar:Show()
       FFBbar:SetValue((28+combusettingstable["combubarwidth"])*((g1-GetTime())/f1))
@@ -2162,16 +2186,17 @@ function Combustion_OnUpdate(self, elapsed)
     else
       FFBbar:Hide()
     end
-      
+
     --------------------------------
     --Ignite part
     CombustionIgnite()
-    
+
     --------------------------------
     --Pyroblast part
-    local a3,b3,c3,d3,e3,f3,g3,h3,i3,j3,k3 = UnitAura("target", pyro1, nil, "PLAYER HARMFUL")		
-    local a4,b4,c4,d4,e4,f4,g4,h4,i4,j4,k4 = UnitAura("target", pyro2, nil, "PLAYER HARMFUL")		
     
+    local a3,b3,c3,d3,e3,f3,g3,h3,i3,j3,k3 = C_UnitAuras.GetAuraDataBySpellName("target", pyro1, "PLAYER HARMFUL")
+    local a4,b4,c4,d4,e4,f4,g4,h4,i4,j4,k4 = C_UnitAuras.GetAuraDataBySpellName("target", pyro2, "PLAYER HARMFUL")
+
     if (k3==11366) then 
       combupyrotimer = (-1*(time-g3))
     elseif (k4==92315) then 
@@ -2180,7 +2205,7 @@ function Combustion_OnUpdate(self, elapsed)
       combupyrotimer = 0
       combupyrodamage = 0
     end
-    
+
     -- condition when timer is with more than 2 seconds left
     if (combupyrotimer >= combusettingstable["combutimervalue"]) and (combupyrotimer ~= 0) then
       PyroTextFrameLabel:SetText(format("|cff00ff00%.1f|r",combupyrotimer))
@@ -2198,43 +2223,43 @@ function Combustion_OnUpdate(self, elapsed)
       PyroLabel:SetText(format(CombuLabel["pyroblast"]))
       PyroTime = 0
     end
-                  
-    if (combusettingstable["combubartimers"] == true) and (k3==11366) and (combupyrotimer <= combusettingstable["combutimervalue"]) then 
+
+    if (combusettingstable["combubartimers"] == true) and (k3==11366) and (combupyrotimer <= combusettingstable["combutimervalue"]) then
       Pyrobar:Show()
       Pyrobar:SetValue((28+combusettingstable["combubarwidth"])*((g3-GetTime())/f3))
       Pyrobar:SetStatusBarColor(unpack(combusettingstable["barcolorwarning"]))
-    elseif (combusettingstable["combubartimers"] == true) and (k3==11366) then 
+    elseif (combusettingstable["combubartimers"] == true) and (k3==11366) then
       Pyrobar:Show()
       Pyrobar:SetValue((28+combusettingstable["combubarwidth"])*((g3-GetTime())/f3))
       Pyrobar:SetStatusBarColor(unpack(combusettingstable["barcolornormal"]))
-    elseif (combusettingstable["combubartimers"] == true) and (k4==92315) and (combupyrotimer <= combusettingstable["combutimervalue"]) then 
+    elseif (combusettingstable["combubartimers"] == true) and (k4==92315) and (combupyrotimer <= combusettingstable["combutimervalue"]) then
       Pyrobar:Show()
       Pyrobar:SetValue((28+combusettingstable["combubarwidth"])*((g4-GetTime())/f4))
       Pyrobar:SetStatusBarColor(unpack(combusettingstable["barcolorwarning"]))
-    elseif (combusettingstable["combubartimers"] == true) and (k4==92315) then 
+    elseif (combusettingstable["combubartimers"] == true) and (k4==92315) then
       Pyrobar:Show()
       Pyrobar:SetValue((28+combusettingstable["combubarwidth"])*((g4-GetTime())/f4))
       Pyrobar:SetStatusBarColor(unpack(combusettingstable["barcolornormal"]))
     else
       Pyrobar:Hide()
     end
-    
+
     --------------------------------
     --Combustion/impact part
     local a5,b5,c5 = GetSpellCooldown(comb)
-    local a7,b7,c7,d7,e7,f7,g7,h7,i7,j7,k7 = UnitAura("player", impact)
-            
+    local a7,b7,c7,d7,e7,f7,g7,h7,i7,j7,k7 = C_UnitAuras.GetAuraDataBySpellName("player", impact)
+
     if (b5 == nil) then
       --pass
 
     -- Combustion damage predicter
     elseif (InCombatLockdown() == 1) and (b5<=2) and combusettingstable["combutickpredict"] == true then
       StatusTextFrameLabel:SetText(CombuDamagePredicter())
-    elseif (b5<=2) and (combusettingstable["combureport"] == true) and (InCombatLockdown() == 1) then 
+    elseif (b5<=2) and (combusettingstable["combureport"] == true) and (InCombatLockdown() == 1) then
       CombustionUp = 1
       ImpactUp = 0
       combufadeout = false
-      combuchatautohide = 0 
+      combuchatautohide = 0
       if (combusettingstable["combureportvalue"] <= combuigndamage) and combusettingstable["combureportthreshold"] then
         StatusTextFrameLabel:SetText(format(CombuLabel["ignCBgreen"], combuigndamage))
       else
@@ -2253,26 +2278,27 @@ function Combustion_OnUpdate(self, elapsed)
       CombustionUp = 0
       ImpactUp = 1
       combufadeout = false
-    
+
     -- timer for combustion in minutes
     elseif ((a5 + b5 - time)>=60) and (combufadeout == false) and (k7 == nil) then
-      StatusTextFrameLabel:SetText(format(CombuLabel["combmin"],(a5 + b5 - time) / 60,(a5 + b5 - time) % 60 ))  
+      StatusTextFrameLabel:SetText(format(CombuLabel["combmin"],(a5 + b5 - time) / 60,(a5 + b5 - time) % 60 ))
       CombustionUp = 0
       ImpactUp = 0
-    
+
     -- timer for combustion in seconds
     elseif ((a5 + b5 - time)<=60) and (k7 == nil) then 
       StatusTextFrameLabel:SetText(format(CombuLabel["combsec"],(a5 + b5 - time)))
       CombustionUp = 0	
       ImpactUp = 0
     end
-            
+
     --------------------------------
     -- Critical Mass/shadow mastery tracking
     if (combusettingstable["combucrit"]==true) then
 
-      local a9,b9,c9,d9,e9,f9,g9,h9,i9,j9,k9 = UnitAura("target", CritMass, nil, "HARMFUL")
-      local a10,b10,c10,d10,e10,f10,g10,h10,i10,j10,k10 = UnitAura("target", ShadowMast, nil, "HARMFUL")
+      local a9,b9,c9,d9,e9,f9,g9,h9,i9,j9,k9 = C_UnitAuras.GetAuraDataBySpellName("target", CritMass, "HARMFUL")
+      local a10,b10,c10,d10,e10,f10,g10,h10,i10,j10,k10 = C_UnitAuras.GetAuraDataBySpellName("target", ShadowMast, "HARMFUL")
+
 
       if (k9==22959) then
         combucrittimer = (-1*(time-g9))
@@ -2287,7 +2313,7 @@ function Combustion_OnUpdate(self, elapsed)
         CritTextFrameLabel:SetText(format("|cff00ff00%.1f|r",combucrittimer))
         CritTextFrameLabel:SetJustifyH("RIGHT")
         CritTypeFrameLabel:SetText(format(CombuLabel["critmasswhite"]))
-      
+
       -- condition when timer is with less than 2 seconds left
       elseif (combucrittimer <= combusettingstable["combutimervalue"]) and (combucrittimer ~= 0) then
         CritTextFrameLabel:SetText(format("|cffff0000%.1f|r",combucrittimer))
@@ -2298,7 +2324,7 @@ function Combustion_OnUpdate(self, elapsed)
         CritTextFrameLabel:SetJustifyH("LEFT")
         CritTypeFrameLabel:SetText("")
       end
-                  
+
       if (k9==22959) and (combucrittimer <= combusettingstable["combutimervalue"]) then
         Critbar:Show()
         Critbar:SetValue((92+combucritwidth)*((g9-GetTime())/f9))
@@ -2324,7 +2350,7 @@ function Combustion_OnUpdate(self, elapsed)
     --------------------------------
     -- Combustion on target tracking
     if (combusettingstable["combutrack"]==true) then
-      local a11,b11,c11,d11,e11,f11,g11,h11,i11,j11,k11 = UnitAura("target", combudot, nil, "PLAYER HARMFUL")
+      local a11,b11,c11,d11,e11,f11,g11,h11,i11,j11,k11 = C_UnitAuras.GetAuraDataBySpellName("target", combudot, "PLAYER HARMFUL")
 
       if (k11==83853) then
         combudottimer = (-1*(time-g11))
@@ -2356,7 +2382,7 @@ function Combustion_OnUpdate(self, elapsed)
       end
 
     end -- end Combustion on target tracking
-    
+
     --------------------------------
     -- Background/border colors settings
     if (combusettingstable["combureportthreshold"] == true) then
@@ -2369,7 +2395,7 @@ function Combustion_OnUpdate(self, elapsed)
         --Green background for frame when threshold is met and combustion are up
         CombustionFrame:SetBackdropColor(unpack(combusettingstable["bgcolorcombustion"]))
         CombustionFrame:SetBackdropBorderColor(unpack(combusettingstable["bgcolorcombustion"]))
-        
+
         if combusettingstable["thresholdalert"] == true then
           PlaySoundFile(CombuLSM:Fetch("sound",combusettingstable["combusoundname"]))
         end
@@ -2399,7 +2425,7 @@ function Combustion_OnUpdate(self, elapsed)
       --Green bg for frame when dots and combustion are up
       CombustionFrame:SetBackdropColor(unpack(combusettingstable["bgcolorcombustion"]))
       CombustionFrame:SetBackdropBorderColor(unpack(combusettingstable["bgcolorcombustion"]))
-    
+
     --Yellow background for frame when dots and Impact are up
     elseif (
       (LBTime == 1) and
@@ -2416,12 +2442,12 @@ function Combustion_OnUpdate(self, elapsed)
       CombustionFrame:SetBackdropColor(unpack(combusettingstable["bgcolornormal"]))
       CombustionFrame:SetBackdropBorderColor(unpack(combusettingstable["edgecolornormal"]))
     end
-    
+
     -- yellow border when impact is up
     if (k7 == 64343) and (ImpactUp == 1) then
       CombustionFrame:SetBackdropBorderColor(unpack(combusettingstable["bgcolorimpact"]))
     end
-    
+
     --------------------------------
     -- autohide part 
     CombustionAutohide()
