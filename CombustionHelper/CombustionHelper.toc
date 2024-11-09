@@ -1,0 +1,41 @@
+## Interface: 40300
+
+## Author : Angayelle of Nordrassil
+
+## Title: CombustionHelper 2.10
+
+## Notes: An addon for optimized use of the Combustion Talent for mages in Cataclysm
+
+## Dependencies:
+
+## SavedVariables: combusettingstable, CombuCautlevelvar, CombuCautscalevar, CombuCautalphavar, CombuCautlockvar, CombuCauthidevar, CombuCautTimevar, CombuCautChatRaidvar, CombuCautChatSayvar, CombuCautChatYellvar, CombuCautAnnouncevar, CombuCautChatAltvar, CombuCautAnnounceAltvar, CombuCautChatAlonevar,CombuCautenablevar
+
+## version: 2.10
+
+Libs\LibStub\LibStub.lua
+
+Libs\LibTransition-1.0\LibTransition-1.0.lua
+
+Libs\LibSharedMedia-3.0\CallbackHandler-1.0\CallbackHandler-1.0.lua
+
+Libs\LibSharedMedia-3.0\lib.xml
+
+Localization.en.lua
+
+Localization.de.lua
+
+Localization.fr.lua
+
+Localization.tw.lua
+
+CombustionHelper.lua
+
+CombustionHelper.xml
+
+Combuoptions.xml
+
+CauterizeCooldown\CauterizeCooldown.lua
+
+CauterizeCooldown\CauterizeCooldown.xml
+
+CauterizeCooldown\CauterizeCooldownOptions.xml
