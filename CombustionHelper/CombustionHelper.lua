@@ -1440,7 +1440,7 @@ local function CombuLBtrackerUpdate()
             _G["LBtrack" .. i .. "Target"]:SetTexture(
               "Interface\\AddOns\\CombustionHelper\\Images\\Combustion_target"
             )
-            print('Target texture 1')
+            -- print('Target texture 1')
             _G["LBtrack" .. i .. "Symbol"]:SetTexture("")
             LBtrackFrame:Hide()
         elseif

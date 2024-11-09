@@ -1,0 +1,12 @@
+## Interface: 40401
+## version: 1.0.0
+## Title: |cff00ccffCombustionHelperClassic|r
+## Author : Jimmy
+
+## DefaultState: enabled
+## SavedVariables: CombustionHelperClassicDB
+## OptionalDeps: Ace3
+
+embeds.xml
+
+Core.lua
