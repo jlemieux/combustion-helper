@@ -9,5 +9,8 @@ ns.CombustionHelperClassic = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEve
 ns.CHC = ns.CombustionHelperClassic
 
 ns.config = {}
+
 ns.events = {}
+
 ns.ui = {}
+ns._ui = {}

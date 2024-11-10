@@ -38,7 +38,6 @@ local interfaceOptions = {
 }
 
 function ns.config.initConfig()
-  ns.AceConsole.Print(ns.CHC, 'config.lua - initConfig...')
   -- set up db
   ns.db = LibStub("AceDB-3.0"):New(addonName.."DB", dbDefaults, true)
   -- set up profiles using the db
@@ -60,5 +59,4 @@ function ns.config.initConfig()
   end
   ns.AceConsole:RegisterChatCommand("chc", OpenInterfaceOptions)
 	ns.AceConsole:RegisterChatCommand(addonName, OpenInterfaceOptions)
-  ns.AceConsole.Print(ns.CHC, 'config.lua - initConfig finished!')
 end

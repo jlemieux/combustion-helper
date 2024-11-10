@@ -7,15 +7,19 @@
 ## SavedVariables: CombustionHelperClassicDB
 ## OptionalDeps: Ace3
 
+## third-party
 embeds.xml
 
+## namespace setup
 exports.lua
 
-config\config.lua
+## modules
 
-events\events.lua
+config\index.xml
 
-UI\container.lua
-UI\ui.lua
+events\index.xml
 
+ui\index.xml
+
+## main
 core.lua

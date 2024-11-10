@@ -1,6 +1,6 @@
 local addonName, ns = ...;
 
-function ns.ui.createContainerFrame()
+function ns._ui.createContainerFrame()
   local PaneBackdrop  = {
     bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
     edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
