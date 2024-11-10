@@ -25,6 +25,8 @@
     "PanelTemplates_TabResize",
     "PanelTemplates_SelectTab",
     "StaticPopup_Show",
-    "UIErrorsFrame"
+    "UIErrorsFrame",
+    "hash_SlashCmdList",
+    "DEFAULT_CHAT_FRAME"
   ]
 }
