@@ -110,6 +110,7 @@ combuoptioninfotableDE = {
 ["CombuSoundDropDown"] = "Verwenden Sie dieses Men�, um die Warnung Sound w�hlen, wenn der Schwellenwert erreicht ist Entz�nden.",
 ["CombuThresholdSoundButton"] = "Aktiviert den Warnton, wenn der Schwellenwert erreicht ist Entz�nden.";
 ["Combubgcolornormal"] = "Stellt die Farbe für der Ränder des Fensters ein, wenn Einäschern und Einschlag nicht verfügbar sind.",
+["CombuTickPredictButton"] = "Replace the Ignite damage value in the Status zone by the estimated damage for each tick of Combustion and the number of ticks depending from your current haste.",
 }
 
 -------------------------------
@@ -161,6 +162,7 @@ CombuOptLocDE = {
 ["CombuSoundInfo"] = "Alarmschwelle :",
 ["CombuThresholdSoundButton"] = "Alarm für Schwellwert",
 ["Combuedgecolornormal"] = "Kantenfarbe (normal)",
+    ["CombuTickPredictButton"] = "Combustion Tick damage/nbr prediction",
 
 }
 

@@ -9,5 +9,13 @@
 
 embeds.xml
 
-config.lua
-Core.lua
+exports.lua
+
+config\config.lua
+
+events\events.lua
+
+UI\container.lua
+UI\ui.lua
+
+core.lua

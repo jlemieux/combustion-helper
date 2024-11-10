@@ -2,7 +2,7 @@
 
 ## Author : Angayelle of Nordrassil
 
-## Title: CombustionHelper 2.9.1
+## Title: CombustionHelper 2.10
 
 ## Notes: An addon for optimized use of the Combustion Talent for mages in Cataclysm
 
@@ -10,7 +10,7 @@
 
 ## SavedVariables: combusettingstable, CombuCautlevelvar, CombuCautscalevar, CombuCautalphavar, CombuCautlockvar, CombuCauthidevar, CombuCautTimevar, CombuCautChatRaidvar, CombuCautChatSayvar, CombuCautChatYellvar, CombuCautAnnouncevar, CombuCautChatAltvar, CombuCautAnnounceAltvar, CombuCautChatAlonevar,CombuCautenablevar
 
-## version: 2.9.1
+## version: 2.10
 
 Libs\LibStub\LibStub.lua
 

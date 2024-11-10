@@ -1,9 +1,5 @@
 local addonName, ns = ...;
 
-ns.AceConfig = LibStub("AceConfig-3.0")
-ns.AceConfigDialog = LibStub("AceConfigDialog-3.0")
-ns.AceConsole = LibStub("AceConsole-3.0")
-
 local dbDefaults = {
 	profile = {
 		message = "Welcome Home!",
@@ -41,7 +37,8 @@ local interfaceOptions = {
 	},
 }
 
-function ns.initConfig()
+function ns.config.initConfig()
+  ns.AceConsole.Print(ns.CHC, 'config.lua - initConfig...')
   -- set up db
   ns.db = LibStub("AceDB-3.0"):New(addonName.."DB", dbDefaults, true)
   -- set up profiles using the db
@@ -63,4 +60,5 @@ function ns.initConfig()
   end
   ns.AceConsole:RegisterChatCommand("chc", OpenInterfaceOptions)
 	ns.AceConsole:RegisterChatCommand(addonName, OpenInterfaceOptions)
+  ns.AceConsole.Print(ns.CHC, 'config.lua - initConfig finished!')
 end

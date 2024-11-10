@@ -107,7 +107,8 @@ combuoptioninfotableTW = {
 	["CombuInsetsSlider"] = "請使用此滑動軸設定框線與背景圖樣間的間距。",
 	["CombuSoundInfo"] = "請從下拉式選單中選擇倒數計時完畢時的警告音效。",
 	["CombuSoundDropDown"] = "請從下拉式選單中選擇倒數計時完畢時的警告音效。",
-    ["CombuThresholdSoundButton"] = "啟用警告音效，超過點燃傷害閥值時給予警示。"
+    ["CombuThresholdSoundButton"] = "啟用警告音效，超過點燃傷害閥值時給予警示。",
+    ["CombuTickPredictButton"] = "Replace the Ignite damage value in the Status zone by the estimated damage for each tick of Combustion and the number of ticks depending from your current haste.",
 	}
 
 -------------------------------
@@ -157,7 +158,8 @@ CombuOptLocTW = {
 	["CombuMunchingButton"] = "點燃吞噬回報",
 	["CombuLanguageInfo"] = "語言:",
     ["CombuSoundInfo"] = "警告音效:",
-    ["CombuThresholdSoundButton"] = "啟用警告音效"
+    ["CombuThresholdSoundButton"] = "啟用警告音效",
+    ["CombuTickPredictButton"] = "Combustion Tick damage/nbr prediction",
 
 	}
 

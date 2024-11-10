@@ -109,6 +109,7 @@ combuoptioninfotableFR = {
 	["CombuSoundDropDown"] = "Utilisez ce menu déroulant pour choisir le son d'alerte lorsque le seuil d'Enflammer est atteint.",
     ["CombuThresholdSoundButton"] = "Active l'alerte sonore lorsque le seuil d'Enflammer est atteint.",
 	["Combuedgecolornormal"] = "Pour choisir la couleur de la bordure par défaut hors Combustion et impact.",
+    ["CombuTickPredictButton"] = "Remplace l'affichage de la valeur d'Enflammer dans la zone de status par les dégats de vos ticks de Combustion ainsi que le nombre de ces ticks dépendant de votre hate.",
 	}
 
 -------------------------------
@@ -160,7 +161,7 @@ CombuOptLocFR = {
     ["CombuSoundInfo"] = "Alerte de seuil :",
     ["CombuThresholdSoundButton"] = "Alerte sonore de seuil",
 	["Combuedgecolornormal"] = "Couleur de la bordure (normal)",
-
+    ["CombuTickPredictButton"] = "Prediction des ticks de Combustion",
 	}
 
 -------------------------------

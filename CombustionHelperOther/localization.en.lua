@@ -109,6 +109,7 @@ combuoptioninfotableEN = {
 	["CombuSoundDropDown"] = "Use the Dropdown menu to choose the audio warning when threshold is crossed.",
     ["CombuThresholdSoundButton"] = "Enable the audio warning when Ignite threshold is crossed.",
 	["Combuedgecolornormal"] = "Set the color for the border of the frame outside Combustion and Impact times.",
+    ["CombuTickPredictButton"] = "Replace the Ignite damage value in the Status zone by the estimated damage for each tick of Combustion and the number of ticks depending from your current haste.",
 	}
 
 -------------------------------
@@ -160,7 +161,7 @@ CombuOptLocEN = {
     ["CombuSoundInfo"] = "Threshold warning :",
     ["CombuThresholdSoundButton"] = "Audio warning for threshold",
 	["Combuedgecolornormal"] = "Border color (normal)",
-
+    ["CombuTickPredictButton"] = "Combustion Tick damage/nbr prediction",
 	}
 
 -------------------------------

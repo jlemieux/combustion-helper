@@ -27,6 +27,8 @@
     "StaticPopup_Show",
     "UIErrorsFrame",
     "hash_SlashCmdList",
-    "DEFAULT_CHAT_FRAME"
+    "DEFAULT_CHAT_FRAME",
+    "ColorPickerFrame",
+    "ChatFrame1"
   ]
 }

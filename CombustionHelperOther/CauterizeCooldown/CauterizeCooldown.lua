@@ -34,7 +34,24 @@ end
 function CombuCautOptions_OnLoad(panel)
 	panel.name = "Cauterize options"
 	panel.parent = "CombustionHelper"
-	InterfaceOptions_AddCategory(panel);
+  -- InterfaceOptions_AddCategory(panel)
+  category, layout = Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name);
+  category.ID = panel.name
+  Settings.RegisterAddOnCategory(category);
+  
+end
+
+-------------------------------
+-- lock function for option panel
+function CombuCautlock()
+
+	if CombuCautlockButton:GetChecked(true) then CombuCautlockvar = true 
+                                 CombuCautFrame:EnableMouse(false)
+                                 CombuCautlockButton:SetChecked(true)
+	else CombuCautlockvar = false 
+         CombuCautFrame:EnableMouse(true)
+         CombuCautlockButton:SetChecked(false)
+	end
 end
 
 -------------------------------
@@ -56,18 +73,6 @@ function CombuCautEnable()
 	end
 end
 
--------------------------------
--- lock function for option panel
-function CombuCautlock()
-
-	if CombuCautlockButton:GetChecked(true) then CombuCautlockvar = true 
-                                 CombuCautFrame:EnableMouse(false)
-                                 CombuCautlockButton:SetChecked(true)
-	else CombuCautlockvar = false 
-         CombuCautFrame:EnableMouse(true)
-         CombuCautlockButton:SetChecked(false)
-	end
-end
 
 -------------------------------
 -- hide function for option panel
@@ -315,17 +320,3 @@ function CombuCaut_OnUpdate(self, elapsed)
 
         end
 end
-
-
---~ SLASH_CombuCautCONFIG1 = "/cauterize"
-
---~ SlashCmdList["CombuCautCONFIG"] = function(msg)
-
---~ 	if msg == "" or  msg == "help" or  msg == "?" or msg == "config" then
---~ 		 InterfaceOptionsFrame_OpenToCategory("Cauterize Options")
---~ 	else
---~ 		 InterfaceOptionsFrame_OpenToCategory("Cauterize Options")
---~ 	end
-
---~ end
-

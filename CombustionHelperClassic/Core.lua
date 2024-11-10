@@ -1,20 +1,16 @@
 local addonName, ns = ...;
 
-ns.CombustionHelperClassic = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0")
-ns.CHC = ns.CombustionHelperClassic
-
 function ns.CHC:OnInitialize()
-  ns.initConfig()
+  ns.AceConsole.Print(ns.CHC, 'Core.lua - Addon initialized!')
 end
 
 function ns.CHC:OnEnable()
-	self:RegisterEvent("ZONE_CHANGED")
+  ns.AceConsole.Print(ns.CHC, 'Core.lua - Addon enabled!')
+  ns.config.initConfig()
+  ns.events.registerEvents()
+  ns.ui.initUI()
 end
 
-function ns.CHC:ZONE_CHANGED()
-  local msg = ns.db.profile.message
-  if ns.db.profile.showOnScreen then
-    UIErrorsFrame:AddMessage(msg, 1, 1, 1)
-  end
-  ns.AceConsole.Print(ns.CHC, msg)
+function ns.CHC:OnDisable()
+  ns.AceConsole.Print(ns.CHC, 'Core.lua - Addon disabled!')
 end
