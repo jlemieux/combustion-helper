@@ -29,6 +29,18 @@
     "hash_SlashCmdList",
     "DEFAULT_CHAT_FRAME",
     "ColorPickerFrame",
-    "ChatFrame1"
+    "ChatFrame1",
+    "MELEE",
+    "SELECTED_CHAT_FRAME",
+    "ACCEPT",
+    "CANCEL",
+    "NORMAL_FONT_COLOR_CODE",
+    "FONT_COLOR_CODE_CLOSE",
+    "SetDesaturation",
+    "OKAY",
+    "NOT_BOUND",
+    "IsSecureCmd",
+    "NUM_CHAT_WINDOWS",
+    "ChatEdit_GetActiveWindow"
   ]
 }
