@@ -1,0 +1,505 @@
+spellId	spellName
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+133	Fireball
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+413843	Ignite
+413841	Ignite
+413843	Ignite
+48108	Hot Streak
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+64343	Impact
+64343	Impact
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2136	Fire Blast
+64343	Impact
+2136	Fire Blast
+12355	Impact
+48108	Hot Streak
+48108	Hot Streak
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+413843	Ignite
+12355	Impact
+413843	Ignite
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+48108	Hot Streak
+92315	Pyroblast!
+92315	Pyroblast!
+92315	Pyroblast!
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+64343	Impact
+64343	Impact
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+92315	Pyroblast!
+92315	Pyroblast!
+30482	Molten Armor
+30482	Molten Armor
+2948	Scorch
+2948	Scorch
+79058	Arcane Brilliance
+1459	Arcane Brilliance
+2948	Scorch
+64343	Impact
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+64343	Impact
+64343	Impact
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+64343	Impact
+2948	Scorch
+2948	Scorch
+2948	Scorch
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+2948	Scorch
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+48108	Hot Streak
+92315	Pyroblast!
+92315	Pyroblast!
+92315	Pyroblast!
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+92315	Pyroblast!
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+92315	Pyroblast!
+92315	Pyroblast!
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+64343	Impact
+64343	Impact
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+413841	Ignite
+413843	Ignite
+64343	Impact
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2136	Fire Blast
+2136	Fire Blast
+48108	Hot Streak
+48108	Hot Streak
+64343	Impact
+64343	Impact
+29077	Master of Elements
+413841	Ignite
+2136	Fire Blast
+48108	Hot Streak
+92315	Pyroblast!
+92315	Pyroblast!
+92315	Pyroblast!
+413841	Ignite
+22959	Critical Mass
+413843	Ignite
+2948	Scorch
+2136	Fire Blast
+2948	Scorch
+2136	Fire Blast
+64343	Impact
+2136	Fire Blast
+12355	Impact
+29077	Master of Elements
+413841	Ignite
+2136	Fire Blast
+413843	Ignite
+92315	Pyroblast!
+12355	Impact
+413843	Ignite
+92315	Pyroblast!
+413841	Ignite
+413843	Ignite
+92315	Pyroblast!
+92315	Pyroblast!
+92315	Pyroblast!
+44457	Living Bomb
+44457	Living Bomb
+2948	Scorch
+2948	Scorch
+44457	Living Bomb
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+2948	Scorch
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+44457	Living Bomb
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+44457	Living Bomb
+413841	Ignite
+413843	Ignite
+44457	Living Bomb
+44457	Living Bomb
+44461	Living Bomb
+44461	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+2948	Scorch
+2948	Scorch
+2948	Scorch
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+44457	Living Bomb
+2948	Scorch
+413843	Ignite
+2948	Scorch
+2948	Scorch
+22959	Critical Mass
+413841	Ignite
+413843	Ignite
+44457	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+44461	Living Bomb
+44461	Living Bomb
+29077	Master of Elements
+22959	Critical Mass
+48108	Hot Streak
+spellId	spellName
+11129	Combustion
+44457	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+44457	Living Bomb
+11129	Combustion
+11129	Combustion
+83853	Combustion
+83853	Combustion
+44457	Living Bomb
+44457	Living Bomb
+44461	Living Bomb
+44461	Living Bomb
+29077	Master of Elements
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+spellId	spellName
+11366	Pyroblast
+11366	Pyroblast
+11366	Pyroblast
+11366	Pyroblast
+22959	Critical Mass
+44457	Living Bomb
+44457	Living Bomb
+11366	Pyroblast
+44457	Living Bomb
+11366	Pyroblast
+2948	Scorch
+44457	Living Bomb
+2948	Scorch
+2948	Scorch
+48108	Hot Streak
+48108	Hot Streak
+29077	Master of Elements
+413841	Ignite
+22959	Critical Mass
+2948	Scorch
+2948	Scorch
+11366	Pyroblast
+48108	Hot Streak
+92315	Pyroblast!
+11366	Pyroblast
+11366	Pyroblast
+92315	Pyroblast!
+92315	Pyroblast!
+22959	Critical Mass
+413843	Ignite
+44457	Living Bomb
+11129	Combustion
+11129	Combustion
+83853	Combustion
+83853	Combustion
+413841	Ignite
+413843	Ignite
+92315	Pyroblast!
+83853	Combustion
+44457	Living Bomb
+44457	Living Bomb
+44461	Living Bomb
+44461	Living Bomb
+64343	Impact
+64343	Impact
+29077	Master of Elements
+83853	Combustion
+83853	Combustion
+92315	Pyroblast!
+83853	Combustion
+83853	Combustion
+83853	Combustion
+92315	Pyroblast!
+83853	Combustion
+83853	Combustion
+83853	Combustion
+83853	Combustion
+92315	Pyroblast!
+92315	Pyroblast!
+64343	Impact
+22959	Critical Mass

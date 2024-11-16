@@ -10,7 +10,16 @@ ns.CHC = ns.CombustionHelperClassic
 
 ns.config = {}
 
+ns.constants = {}
+
 ns.events = {}
 
 ns.ui = {}
 ns._ui = {}
+
+if (LoggingCombat()) then
+  DEFAULT_CHAT_FRAME:AddMessage("Combat is already being logged")
+else
+  DEFAULT_CHAT_FRAME:AddMessage("Combat is not being logged - starting it!")
+  LoggingCombat(true);
+end
