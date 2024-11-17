@@ -17,6 +17,8 @@ ns.events = {}
 ns.ui = {}
 ns._ui = {}
 
+ns.tests = {}
+
 if (LoggingCombat()) then
   DEFAULT_CHAT_FRAME:AddMessage("Combat is already being logged")
 else

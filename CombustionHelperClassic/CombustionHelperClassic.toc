@@ -25,3 +25,5 @@ ui\index.xml
 
 ## main
 core.lua
+
+tests\index.xml

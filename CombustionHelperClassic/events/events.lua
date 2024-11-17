@@ -9,7 +9,8 @@ function ns.events.registerEvents()
   ns.CHC:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
-local igniteBank = {}
+ns.igniteBank = {}
+local igniteBank = ns.igniteBank
 
 
 local function getMasteryCoeff()
@@ -53,28 +54,18 @@ local function createTransaction(bank, kind, damage, amount)
   }
 end
 
-local function destroyBankAccount(guid)
+local function destroyBankAccount(bank)
+  local guid = bank.guid
   printTransactions(guid)
+  assert(
+    igniteBank[guid].expectedWithdrawlsLeft == 0,
+    'Accounts should have fulfilled all their withdrawls before being closed!'
+  )
   -- igniteBank[guid].transactions = nil -- is this needed for proper GC?
   igniteBank[guid] = nil
 end
 
-local function depositIgniteDamage(guid, damage)
-  local ticks = igniteBank[guid] and 3 or 2
-  igniteBank[guid] = igniteBank[guid] or {
-    transactions = {}, -- [+100, -50, -50], [+100, -50, +100, -50, -50, -50], [+100, +100, -66.67, -66.67, -66.67]
-    balance = 0,
-    expectedWithdrawlAmount = nil,
-    expectedWithdrawlsLeft = nil,
-    -- lastExpectedWithdrawlAmount = nil,
-    -- lastExpectedWithdrawlsLeft = nil,
-  }
-  local bank = igniteBank[guid]
-
-  -- bank.lastExpectedWithdrawlAmount = bank.expectedWithdrawlAmount
-  -- bank.lastExpectedWithdrawlsLeft = bank.expectedWithdrawlsLeft
-
-  local amount = 0.4 * damage * getMasteryCoeff()
+local function applyDeposit(bank, damage, amount, ticks)
   local total = bank.balance + amount
   bank.balance = total
   bank.expectedWithdrawlAmount = total / ticks
@@ -83,12 +74,29 @@ local function depositIgniteDamage(guid, damage)
   table.insert(bank.transactions, createTransaction(bank, 'deposit', damage, amount))
 end
 
+local function depositIgniteDamage(guid, damage)
+  local ticks = igniteBank[guid] and 3 or 2
+  igniteBank[guid] = igniteBank[guid] or {
+    guid = guid,
+    transactions = {}, -- [+100, -50, -50], [+100, -50, +100, -50, -50, -50], [+100, +100, -66.67, -66.67, -66.67]
+    balance = 0,
+    expectedWithdrawlAmount = nil,
+    expectedWithdrawlsLeft = nil,
+  }
+  local bank = igniteBank[guid]
+
+  local amount = 0.4 * damage * getMasteryCoeff()
+  applyDeposit(bank, damage, amount, ticks)
+end
+
 local function withdrawlAmountMatchesExpectation(expected, actual)
-  local ok = math.abs(expected - actual) <= 1
+  -- NOTE: tried using 1 as epsilon amount, but due to rounding compounded with floating point math, we need 1.1
+  local epsilon = 1.1
+  local ok = math.abs(expected - actual) <= epsilon
   if not ok then
     ns.AceConsole.Print(
       ns.CHC,
-      'Withdrawl amount deviated from expectation by more than 1! '..
+      'Withdrawl amount deviated from expectation by more than '..epsilon..'! '..
         'Expected=<'..expected..'>, Actual=<'..actual..'> '
     )
   end
@@ -119,30 +127,46 @@ local function rollbackLastTransaction(bank)
   return table.remove(bank.transactions, #bank.transactions)
 end
 
-local function reconcileLateIgniteWithdrawl(bank, damage)
-  ns.AceConsole.Print(ns.CHC, 'Attempting to reconcile the late withdrawl...')
 
+
+local function reconcileIgniteWithdrawl(bank, damage)
+  ns.AceConsole.Print(ns.CHC, 'Attempting to reconcile the withdrawl...')
+
+  -- CONSOLIDATED 3 TICK WITHDRAWL SCENARIO
+  if (
+    bank.expectedWithdrawlsLeft == 3 and
+    withdrawlAmountMatchesExpectation(bank.balance, damage) and
+    withdrawIsValid(bank, (damage / 3))
+  ) then
+    bank.expectedWithdrawlsLeft = 1
+    -- todo: should I leave this amount as the smaller amount, to better match the aura duration?
+    -- bank.expectedWithdrawlAmount = damage
+    applyWithdrawl(bank, damage)
+    destroyBankAccount(bank)
+    return
+  end
+
+
+
+  -- LATE WITHDRAWL SCENARIO
   local lastTransaction = rollbackLastTransaction(bank)
   assert(
     lastTransaction.kind == 'deposit',
-    'Could not reconcile withdrawl!'..
+    'Could not reconcile withdrawl! '..
       'Current understanding of this bug assumes untimely deposits are the only cause!'
   )
-
-  -- apply late withdrawl
+  -- apply rejected withdrawl
   assert(
     withdrawIsValid(bank, damage),
-    'Could not reconcile withdrawl!'..
+    'Could not reconcile withdrawl! '..
       'Some other edge case has happened'
   )
   applyWithdrawl(bank, damage)
-
   -- reapply rolled back deposit
-  -- .... do it here....
-
-  -- todo: is there a faster way to get to the end state we want,
-  -- without rolling back, and reapplying?
-
+  applyDeposit(bank, lastTransaction.damage, lastTransaction.amount, 3)
+  -- todo: can we make this faster, such as getting to the end state we want,
+  -- without rolling back and reapplying?
+  ns.AceConsole.Print(ns.CHC, 'Reconciled late withdrawl successfully!')
 end
 
 
@@ -151,13 +175,14 @@ local function withdrawIgniteDamage(guid, damage)
   local bank = assert(igniteBank[guid], 'Bank does not exist, cannot withdraw!')
 
   if not withdrawIsValid(bank, damage) then
-    reconcileLateIgniteWithdrawl(bank, damage)
+    reconcileIgniteWithdrawl(bank, damage)
+    return
   end
 
   applyWithdrawl(bank, damage)
 
   if bank.expectedWithdrawlsLeft == 0 then
-    destroyBankAccount(guid)
+    destroyBankAccount(bank)
   end
 end
 

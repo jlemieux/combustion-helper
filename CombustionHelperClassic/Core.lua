@@ -9,6 +9,8 @@ function ns.CHC:OnEnable()
   ns.config.initConfig()
   ns.events.registerEvents()
   ns.ui.initUI()
+
+  -- ns.tests.runTests()
 end
 
 function ns.CHC:OnDisable()
