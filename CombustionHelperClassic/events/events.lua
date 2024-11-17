@@ -56,7 +56,7 @@ end
 
 local function destroyBankAccount(bank)
   local guid = bank.guid
-  printTransactions(guid)
+  -- printTransactions(guid)
   assert(
     igniteBank[guid].expectedWithdrawlsLeft == 0,
     'Accounts should have fulfilled all their withdrawls before being closed!'
@@ -143,6 +143,7 @@ local function reconcileIgniteWithdrawl(bank, damage)
     -- bank.expectedWithdrawlAmount = damage
     applyWithdrawl(bank, damage)
     destroyBankAccount(bank)
+    ns.AceConsole.Print(ns.CHC, 'Reconciled consolidated withdrawl successfully!')
     return
   end
 
@@ -151,13 +152,13 @@ local function reconcileIgniteWithdrawl(bank, damage)
   -- LATE WITHDRAWL SCENARIO
   local lastTransaction = rollbackLastTransaction(bank)
   assert(
-    lastTransaction.kind == 'deposit',
+    lastTransaction.kind == 'deposit' or printAllAccountsTransactions(),
     'Could not reconcile withdrawl! '..
       'Current understanding of this bug assumes untimely deposits are the only cause!'
   )
   -- apply rejected withdrawl
   assert(
-    withdrawIsValid(bank, damage),
+    withdrawIsValid(bank, damage) or printAllAccountsTransactions(),
     'Could not reconcile withdrawl! '..
       'Some other edge case has happened'
   )
@@ -186,6 +187,8 @@ local function withdrawIgniteDamage(guid, damage)
   end
 end
 
+local totalDeposits = 0
+local totalWithdrawls = 0
 
 function ns.CHC:COMBAT_LOG_EVENT_UNFILTERED()
   local timestamp,
@@ -224,13 +227,18 @@ function ns.CHC:COMBAT_LOG_EVENT_UNFILTERED()
 
     if CAUSES_IGNITE[spellId] and critical then
       depositIgniteDamage(destGUID, amount)
+      totalDeposits = totalDeposits + 1
     elseif spellId == SPELLS.IgniteDamage then
       withdrawIgniteDamage(destGUID, amount)
-    elseif spellId == SPELLS.IceLance then
-      printAllAccountsTransactions()
+      totalWithdrawls = totalWithdrawls + 1
     end
-
+  elseif subEvent == "SPELL_CAST_SUCCESS" and spellId == SPELLS.SlowFall then
+    printAllAccountsTransactions()
+    ns.AceConsole.Print(ns.CHC, 'Total Deposits: '..totalDeposits)
+    ns.AceConsole.Print(ns.CHC, 'Total Withdrawls: '..totalWithdrawls)
   end
+
+  -- end
 
   -- -- targeted event
   -- if (destGUID == targetGUID) then

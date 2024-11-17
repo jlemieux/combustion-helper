@@ -33,6 +33,7 @@ ns.constants.SPELLS = {
   -- testing purposes only
   FireSpec = 84668,
   IceLance = 30455,
+  SlowFall = 130,
 }
 
 ns.constants.CAUSES_IGNITE = {

@@ -8,7 +8,7 @@ function ns.CHC:OnEnable()
   ns.AceConsole.Print(ns.CHC, 'core.lua - Addon enabled!')
   ns.config.initConfig()
   ns.events.registerEvents()
-  ns.ui.initUI()
+  -- ns.ui.initUI()
 
   -- ns.tests.runTests()
 end
