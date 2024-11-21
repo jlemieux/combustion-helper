@@ -1,0 +1,103 @@
+172 - 195 for repro 2
+todo: impact spreading, how to identify successful impact?
+also, unit_died subevent, destory bank if exists still
+also, ignite ticks can miss! i think we will have to treat as a normal withdrawl
+  dont update the tick amount, we wont get a tick to confirm. just need to withdraw from balance the expected tick amount, and call it a day
+ignite ticks can be resisted! include resisted damage as part of withdrawl
+
+overkill > 0 ( or 1?) could indicate death, if needed besiddes unit_died
+
+gaining impact:
+SPELL_AURA_APPLIED / SPELL_AURA_REFRESH : impact aura to player
+SPELL_CAST_SUCCESS: impact aura to player again technically
+
+
+spending impact:
+SPELL_CAST_SUCCESS fire blast
+SPELL_AURA_REMOVED Impact buff from player
+SPELL_DAMAGE fire blast
+SPELL_AURA_APPLIED impact stun to the target (may not happen if immune i guess? or DR?)
+SPELL_AURA_REMOVED impact stun from the target (may not happen if immune i guess? or DR?)
+
+spending impact miss:
+SPELL_CAST_SUCCESS fire blast
+SPELL_MISSED Impact stun/aura on the target i assume (or ALSO seems to be the impact spread thats missing the other targets nearby. could expect multiple of these if it misses on many targets..)
+SPELL_AURA_REMOVED Impact buff from player
+SPELL_DAMAGE fire blast
+
+spending impact conclusion?:
+SPELL_CAST_SUCCESS fire blast
+SPELL_AURA_REMOVED Impact buff from player
+
+gaining impact conclusion?:
+SPELL_AURA_APPLIED / SPELL_AURA_REFRESH : impact aura to player (make sure this is the player one, not the stun aura applied to target)
+
+
+ASSUMPTION:
+when spreading ignite, it takes the impact targets ignite,
+and applies the remaining un-ticked damage as a new 2-tick ignite.
+ex:
+1. 6105 fireball crit
+	1.1 = .4*6105 = 1221*2
+2. tick#1 for 1221
+3. impact spread from a mob with
+	3.1: a 3 tick ignite, that has already ticked twice
+	3.2: each tick is 527, so only 527 is left in the bank after the 2nd tick
+4. mob gets 1221 wiped out, and replaced with 527 / 2 = 263 for 2 ticks
+
+QUESTIONS:
+1. need to check what happens when fireblast crits with impact, does it affect the ignite?
+  1a. NO, it spreads the ignite as it is at the time of the fireblast, before any further crits are considered.
+  It will indeed refresh the ignite of the target, and add to it like any other crit, but that happens after impact spreads
+  Its going to be important to snapshot the ignite bank of the target on impact spend,
+    so that when the immediate fireblast crit goes to update the bank, its already been snap shotted for spreading calcs
+
+1.1. I think i havent seen a scenario where the fireblast itself misses, does that still spread impact? i have only seen a scenario where the impact stun aura misses
+  1.1a. going to ignore this for now, and just focus on tracking impact spends, only to determine if ignite applies/refreshes came from an impact.
+  if the impact spread misses some targets, or it misses entirely, there shouldn't be apply/refresh events for the nearby mobs right?
+  only concern is that an apply/refresh of ignite could have came from another ability, and we falsely attribute it to an impact spread
+    (even though we can determine it missed, and surely is not the cause of the apply/refresh)
+  with that said, this scenario can still happen even with perfect miss tracking. we need to rely on the time window (100ms?) to attribute apply/refresh to a previous impact spend
+
+
+SOLUTION TO IMPACT TRACKING:
+1. use a time delta: like 100ms
+2. keep a stack of impact (and/or fireblast?) spends
+3. check top of the stack if its within time delta for any aura applies/refreshes
+4. if it is in range, assume the aura applies came from impact
+
+IMPACT TRACKING potential issues:
+1. what if i cast an aura, like Living Bomb, within 100ms of spending impact?
+2. does it matter if impact falls of without being spent? maybe need a combo of impact and fireblast to track it (think rxjs zip)
+  2a. yes, going to use `spending impact conclusion` above
+3. again like above, how to track impact spends consistently?
+  3.1 maybe another time delta, but smaller. like 10ms. and it has to be:
+    SPELL_CAST_SUCCESS fire blast
+    SPELL_AURA_REMOVED Impact buff from player
+  3.2 what about misses? does it just miss the stun, or also the spread?
+    3.2a. covered above in QUESTIONS
+
+
+=AND(AND($B1="SPELL_DAMAGE", $D1="Drinkingfast-Faerlina-US"),$AK1=1)
+=AND(AND($D1="Drinkingfast-Faerlina-US",$B1="SPELL_DAMAGE"), $L1="Ignite")
+NexusLog spellName filters:
+- (blanks)
+- 0
+- 1
+- 3019
+- 3020
+- blast Wave
+- combustion
+- creature-*
+- dragons Breath
+- fire blast
+- fireball
+- flamestrike
+- hot streak
+- ignite
+- impact
+- molten armor
+- pyroblast
+- pyroblast!
+- scorch
+- slow fall
